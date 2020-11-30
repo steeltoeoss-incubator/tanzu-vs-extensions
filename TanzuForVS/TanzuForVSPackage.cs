@@ -67,6 +67,7 @@ namespace TanzuForVS
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await TanzuCloudExplorerCommand.InitializeAsync(this);
+            await PushToCloudFoundryCommand.InitializeAsync(this);
         }
 
         protected override object GetService(Type serviceType)
