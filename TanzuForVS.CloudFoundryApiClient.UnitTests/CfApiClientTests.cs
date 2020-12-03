@@ -524,7 +524,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsFalse(appWasDeleted);
         }
 
-
+        //TODO: Tests for new deploy api endpoints
          
     }
 }

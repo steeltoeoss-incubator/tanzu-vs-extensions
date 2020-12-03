@@ -25,6 +25,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string createPckgsPath = "/v3/packages";
         internal static readonly string uplaodBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
+        internal static readonly string getBuildPath = "/v3/builds";
         internal static readonly string assignDropletsPath = "/v3/apps/:guid/relationships/current_droplet";
 
         public static readonly string defaultAuthClientId = "cf";
@@ -378,12 +379,12 @@ namespace TanzuForVS.CloudFoundryApiClient
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
                 //does a guid need to be assigned?
-                var createAppPath = createAppsPath + $"/{appGuid}" ;
+                var createAppPath = createAppsPath + $"/{appGuid}";
 
                 var uri = new UriBuilder(cfTarget)
                 {
                     Path = createAppPath
-                };   
+                };
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -392,7 +393,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createAppPath}` was {response.StatusCode}");
 
                 if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false; 
+                return false;
             }
             catch (Exception e)
             {
@@ -536,7 +537,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         }
 
         //assign droplet PATCH /v3/apps/:guid/relationships/current_droplet
-        public async Task<bool> AssignDroplet(string cfTarget, string accessToken, string dropletGuid)
+        public async Task<bool> AssignDroplet(string cfTarget, string accessToken, string appGuid, string dropletGuid)
         {
             try
             {
@@ -545,7 +546,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var assignDropletPath = assignDropletsPath + $"/{dropletGuid}";
+                var assignDropletPath = assignDropletsPath + $"/{appGuid}" + $"/{dropletGuid}";
 
                 var uri = new UriBuilder(cfTarget)
                 {
@@ -553,7 +554,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 };
 
                 //find PATCH    
-                var request = new HttpRequestMessage(HttpMethod.Patch, uri.ToString());
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), uri.ToString());
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
@@ -569,8 +570,40 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
+        /// <summary>
+        /// Get info about a Build via GET /v3/builds/${BUILD_GUID}
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="buildGuid"></param>
+        /// <returns></returns>
+        public async Task<Build> GetBuildAsync(string cfTarget, string accessToken, string buildGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
 
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = getBuildPath + $"/{buildGuid}"
+                };
 
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from GET `{getBuildPath}/{buildGuid}` was {response.StatusCode}");
+                return // deserialize response into a BUILD object
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false; // TODO: what to return here?
+            }
+        }
 
     }
 }
