@@ -21,6 +21,11 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string listSpacesPath = "/v3/spaces";
         internal static readonly string listAppsPath = "/v3/apps";
         internal static readonly string deleteAppsPath = "/v3/apps";
+        internal static readonly string createAppsPath = "/v3/apps";
+        internal static readonly string createPckgsPath = "/v3/packages";
+        internal static readonly string uplaodBitsPath = "v3/packages/:guid/upload";
+        internal static readonly string createBuildsPath = "/v3/builds";
+        internal static readonly string assignDropletsPath = "/v3/apps/:guid/relationships/current_droplet";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -360,5 +365,212 @@ namespace TanzuForVS.CloudFoundryApiClient
                 return false;
             }
         }
+
+
+        //create an app POST v3/apps
+        public async Task<bool> CreateApp(string cfTarget, string accessToken, string appGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                //does a guid need to be assigned?
+                var createAppPath = createAppsPath + $"/{appGuid}" ;
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = createAppPath
+                };   
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createAppPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false; 
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        //create Pckg POST v3/packages
+        public async Task<bool> CreateAppPackage(string cfTarget, string accessToken, string spaceGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var createPckgPath = createPckgsPath + $"/{spaceGuid}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = createPckgPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createPckgPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        //TODO
+        //create temp .zip file
+        //delete .zip file
+        public async Task<bool> CreateTempZip(string cfTarget, string accessToken, string appGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var deleteAppPath = deleteAppsPath + $"/{appGuid}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = deleteAppPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        //upload app bits POST v3/packages/:guid/upload
+        public async Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uplaodBitPath = uplaodBitsPath + $"/{pckgBits}" + $"/{path}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = uplaodBitPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{uplaodBitPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        //create build POST v3/builds
+        public async Task<bool> CreateBuild(string cfTarget, string accessToken, string pckgGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var createBuildPath = createBuildsPath + $"/{pckgGuid}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = createBuildPath
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createBuildPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+        //assign droplet PATCH /v3/apps/:guid/relationships/current_droplet
+        public async Task<bool> AssignDroplet(string cfTarget, string accessToken, string dropletGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var assignDropletPath = assignDropletsPath + $"/{dropletGuid}";
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = assignDropletPath
+                };
+
+                //find PATCH    
+                var request = new HttpRequestMessage(HttpMethod.Patch, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from PATCH `{assignDropletPath}` was {response.StatusCode}");
+
+                if (response.StatusCode == HttpStatusCode.Accepted) return true;
+                return false;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
+
+
+
+
     }
 }
