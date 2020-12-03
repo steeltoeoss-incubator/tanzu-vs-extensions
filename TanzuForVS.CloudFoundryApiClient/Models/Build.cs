@@ -44,10 +44,10 @@ namespace TanzuForVS.CloudFoundryApiClient.Models
 
     public class Relationships
     {
-        public App app { get; set; } // TODO: this makes "App" an ambiguous reference; figure out some way to disambiguate between this "app" and the full app model
+        public AppData app { get; set; } // TODO: this makes "App" an ambiguous reference; figure out some way to disambiguate between this "app" and the full app model
     }
 
-    public class App
+    public class AppData
     {
         public Data1 data { get; set; }
     }

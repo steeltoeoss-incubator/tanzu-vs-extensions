@@ -596,12 +596,16 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var response = await _httpClient.SendAsync(request);
                 if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from GET `{getBuildPath}/{buildGuid}` was {response.StatusCode}");
-                return // deserialize response into a BUILD object
+
+                string resultContent = await response.Content.ReadAsStringAsync();
+                var build = JsonConvert.DeserializeObject<Build>(resultContent);
+
+                return build; // TODO: test that when the response status code is 200 we get a legit Build object back from this method
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
-                return false; // TODO: what to return here?
+                return null;
             }
         }
 

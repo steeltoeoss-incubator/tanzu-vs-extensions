@@ -196,24 +196,26 @@ namespace TanzuForVS.Services.CloudFoundry
         }
 
         //how to do this because "deployAppWithGuid" doesnt exist on apiclient.....
-        public async Task<bool> DeployAppAsync(CloudFoundryApp app)
-        {
-            try
-            {
-                var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-                var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+        //public async Task<bool> DeployAppAsync(CloudFoundryApp app)
+        //{
+        //    try
+        //    {
+        //        var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
+        //        var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
 
-                bool appWasDeploy = await _cfApiClient.DeployAppWithGuid(target, token, app.AppId);
+        //        bool appWasDeploy = await _cfApiClient.DeployAppWithGuid(target, token, app.AppId);
 
-                if (appWasDeployed) app.State = "DEPLOYED";
-                return appWasDeployed;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
-        }
+        //        if (appWasDeployed) app.State = "DEPLOYED";
+        //        return appWasDeployed;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        System.Diagnostics.Debug.WriteLine(e);
+        //        return false;
+        //    }
+        //}
+
+        // TODO: ^^^
 
 
     }

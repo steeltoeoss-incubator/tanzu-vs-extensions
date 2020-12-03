@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using TanzuForVS.CloudFoundryApiClient;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 using RichardSzalay.MockHttp;
@@ -524,7 +525,39 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsFalse(appWasDeleted);
         }
 
+        [TestMethod]
+        public async Task GetBuildAsync_ReturnsNull_WhenAnExceptionIsThrown()
+        {
+            var fakeBuildGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
+
+            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var build = await _sut.GetBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
+           
+            Assert.IsNull(build);
+        }
+        
+        [TestMethod]
+        public async Task GetBuildAsync_ReturnsNull_WhenResponseCodeIsNot200()
+        {
+            var fakeBuildGuid = "my fake guid";
+            string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
+
+            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var build = await _sut.GetBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
+
+            Assert.IsNull(build);
+        }
+
         //TODO: Tests for new deploy api endpoints
-         
+
     }
 }

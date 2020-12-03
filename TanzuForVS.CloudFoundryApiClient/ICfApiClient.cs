@@ -30,6 +30,6 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<bool> CreateTempZip(string cfTarget, string accessToken, string appGuid);
         Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path);
         Task<bool> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
-        Task<bool> AssignDroplet(string cfTarget, string accessToken, string dropletGuid);
+        Task<bool> AssignDroplet(string cfTarget, string accessToken, string appGuid, string dropletGuid);
     }
 }
