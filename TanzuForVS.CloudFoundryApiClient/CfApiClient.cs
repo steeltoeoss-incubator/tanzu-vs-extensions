@@ -513,12 +513,24 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var createBuildPath = createBuildsPath + $"/{pckgGuid}";
+                var createBuildPath = createBuildsPath;
 
                 var uri = new UriBuilder(cfTarget)
                 {
                     Path = createBuildPath
                 };
+
+                // TODO: make sure we have application/json header + any other headers (look at uaa client login method for help)
+                string json = JsonConvert.SerializeObject(new
+                {
+                    package = new
+                    {
+                        guid = pckgGuid
+                    }                
+                });
+
+                var postBody = new List<KeyValuePair<string, string>>();
+                postBody.Add(new KeyValuePair<string, string>("guid", pckgGuid));
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -600,7 +612,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 string resultContent = await response.Content.ReadAsStringAsync();
                 var build = JsonConvert.DeserializeObject<Build>(resultContent);
 
-                return build; // TODO: test that when the response status code is 200 we get a legit Build object back from this method
+                return build;
             }
             catch (Exception e)
             {
