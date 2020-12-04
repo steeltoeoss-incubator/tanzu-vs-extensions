@@ -577,6 +577,24 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(build.guid, "fake build guid");  
         }
 
+        [TestMethod]
+        public async Task CreateBuildAsync_ReturnsNull_WhenAnExceptionIsThrown()
+        {
+            Assert.Fail("NYI");
+        }
+        
+        [TestMethod]
+        public async Task CreateBuildAsync_ReturnsNull_WhenResponseCodeIsNot201()
+        {
+            Assert.Fail("NYI");
+        }
+                
+        [TestMethod]
+        public async Task CreateBuildAsync_ReturnsABuild_WhenResponseCodeIs201()
+        {
+            Assert.Fail("NYI");
+        }
+
         //TODO: Tests for new deploy api endpoints
 
         //[TestMethod]

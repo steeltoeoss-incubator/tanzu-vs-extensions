@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
@@ -29,7 +30,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<bool> CreateAppPackage(string cfTarget, string accessToken, string appGuid);
         Task<bool> CreateTempZip(string cfTarget, string accessToken, string appGuid);
         Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path);
-        Task<bool> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
         Task<bool> AssignDroplet(string cfTarget, string accessToken, string appGuid, string dropletGuid);
+        Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
@@ -504,7 +505,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         }
 
         //create build POST v3/builds
-        public async Task<bool> CreateBuild(string cfTarget, string accessToken, string pckgGuid)
+        public async Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid)
         {
             try
             {
@@ -529,22 +530,23 @@ namespace TanzuForVS.CloudFoundryApiClient
                     }                
                 });
 
-                var postBody = new List<KeyValuePair<string, string>>();
-                postBody.Add(new KeyValuePair<string, string>("guid", pckgGuid));
-
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                request.Content = new StringContent(json, Encoding.UTF8, "applicaiton/json"); ;
+                request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createBuildPath}` was {response.StatusCode}");
+                if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createBuildPath}` was {response.StatusCode}");
 
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var build = JsonConvert.DeserializeObject<Build>(responseContent);
+                
+                return build;
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
-                return false;
+                return null;
             }
         }
 
