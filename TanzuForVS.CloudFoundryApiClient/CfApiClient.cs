@@ -381,7 +381,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<bool> CreateApp(string cfTarget, string accessToken)
+        public async Task<App> CreateApp(string cfTarget, string accessToken)
         {
             try
             {
@@ -401,15 +401,17 @@ namespace TanzuForVS.CloudFoundryApiClient
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createAppPath}` was {response.StatusCode}");
+                if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createAppPath}` was {response.StatusCode}");
 
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var app = JsonConvert.DeserializeObject<App>(responseContent);
+
+                return app;
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
-                return false;
+                return null;
             }
         }
 
@@ -420,7 +422,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="spaceGuid"></param>
         /// <returns></returns>
-        public async Task<bool> CreateAppPackage(string cfTarget, string accessToken, string spaceGuid)
+        public async Task<bool> CreatePackage(string cfTarget, string accessToken, string spaceGuid)
         {
             try
             {
@@ -499,7 +501,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="pckgGuid"></param>
         /// <returns></returns>
-        public async Task<Build> CreateBuildAsync(string cfTarget, string accessToken, string pckgGuid)
+        public async Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid)
         {
             try
             {
@@ -591,7 +593,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="accessToken"></param>
         /// <param name="buildGuid"></param>
         /// <returns></returns>
-        public async Task<Build> GetBuildAsync(string cfTarget, string accessToken, string buildGuid)
+        public async Task<Build> GetBuild(string cfTarget, string accessToken, string buildGuid)
         {
             try
             {
