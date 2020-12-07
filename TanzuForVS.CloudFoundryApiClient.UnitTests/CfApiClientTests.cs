@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Token;
 using TanzuForVS.CloudFoundryApiClient.Models;
+using TanzuForVS.CloudFoundryApiClient.Models.Build;
+using TanzuForVS.CloudFoundryApiClient.Models.Package;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 {
@@ -683,6 +685,118 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(result.guid, fakeBuildGuid);
         }
+        
+        [TestMethod]
+        public async Task CreatePackage_ReturnsNull_WhenAnExceptionIsThrown()
+        {
+            var fakePackageGuid = "my fake guid";
 
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createPackagesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreatePackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+        }
+
+        [TestMethod]
+        public async Task CreatePackage_ReturnsNull_WhenResponseCodeIsNot201()
+        {
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createPackagesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreatePackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+        }
+                
+        [TestMethod]
+        public async Task CreatePackage_ReturnsAPackage_WhenResponseCodeIs201()
+        {
+            var fakePackageGuid = "fake package guid";
+            var fakeAppGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createPackagesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Created, "application/json", JsonConvert.SerializeObject(new Package { guid = fakePackageGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreatePackage(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.guid, fakePackageGuid);
+        }
+
+        [TestMethod]
+        public async Task SetDropletForApp_ReturnsFalse_WhenAnExceptionIsThrown()
+        {
+            const string fakeAppGuid = "fake app guid";
+            const string fakeDropletGuid = "fake droplet guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.setDropletForAppPath.Replace(":guid", fakeAppGuid);
+
+            MockedRequest setDropletRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+            
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.SetDropletForApp(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid, fakeDropletGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(setDropletRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task SetDropletForApp_ReturnsFalse_WhenResponseCodeIsNot200()
+        {
+            const string fakeAppGuid = "fake app guid";
+            const string fakeDropletGuid = "fake droplet guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.setDropletForAppPath.Replace(":guid", fakeAppGuid);
+
+            MockedRequest setDropletRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.SetDropletForApp(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid, fakeDropletGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(setDropletRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task SetDropletForApp_ReturnsTrue_WhenResponseCodeIs200()
+        {
+            const string fakeAppGuid = "fake app guid";
+            const string fakeDropletGuid = "fake droplet guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.setDropletForAppPath.Replace(":guid", fakeAppGuid);
+
+            MockedRequest setDropletRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.OK);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.SetDropletForApp(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid, fakeDropletGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(setDropletRequest));
+            Assert.IsTrue(result);
+        }
     }
 }

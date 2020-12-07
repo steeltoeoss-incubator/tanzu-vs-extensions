@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.Build;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.Package;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
@@ -23,11 +25,11 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string listAppsPath = "/v3/apps";
         internal static readonly string deleteAppsPath = "/v3/apps";
         internal static readonly string createAppsPath = "/v3/apps";
-        internal static readonly string createPckgsPath = "/v3/packages";
+        internal static readonly string createPackagesPath = "/v3/packages";
         internal static readonly string uplaodBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string getBuildPath = "/v3/builds";
-        internal static readonly string assignDropletsPath = "/v3/apps/:guid/relationships/current_droplet";
+        internal static readonly string setDropletForAppPath = "/v3/apps/:guid/relationships/current_droplet";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -420,9 +422,9 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// </summary>
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>
-        /// <param name="spaceGuid"></param>
+        /// <param name="appGuid"></param>
         /// <returns></returns>
-        public async Task<bool> CreatePackage(string cfTarget, string accessToken, string spaceGuid)
+        public async Task<Package> CreatePackage(string cfTarget, string accessToken, string appGuid)
         {
             try
             {
@@ -431,26 +433,45 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var createPckgPath = createPckgsPath + $"/{spaceGuid}";
-
                 var uri = new UriBuilder(cfTarget)
                 {
-                    Path = createPckgPath
+                    Path = createPackagesPath
                 };
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                string json = JsonConvert.SerializeObject(new
+                {
+                    type = "bits",
+                    relationships = new
+                    {
+                        app = new
+                        {
+                            data = new
+                            {
+                                guid = appGuid
+                            }
+                        }
+                    }
+                });
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
+                request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{createPckgPath}` was {response.StatusCode}");
+                if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createPackagesPath}` was {response.StatusCode}");
 
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var package = JsonConvert.DeserializeObject<Package>(responseContent);
+
+                return package;
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e);
-                return false;
+                return null;
             }
         }
 
@@ -522,11 +543,13 @@ namespace TanzuForVS.CloudFoundryApiClient
                     package = new
                     {
                         guid = pckgGuid
-                    }                
+                    }
                 });
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-                request.Content = new StringContent(json, Encoding.UTF8, "applicaiton/json"); 
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
@@ -535,7 +558,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 string responseContent = await response.Content.ReadAsStringAsync();
                 var build = JsonConvert.DeserializeObject<Build>(responseContent);
-                
+
                 return build;
             }
             catch (Exception e)
@@ -553,7 +576,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="appGuid"></param>
         /// <param name="dropletGuid"></param>
         /// <returns></returns>
-        public async Task<bool> AssignDroplet(string cfTarget, string accessToken, string appGuid, string dropletGuid)
+        public async Task<bool> SetDropletForApp(string cfTarget, string accessToken, string appGuid, string dropletGuid)
         {
             try
             {
@@ -562,22 +585,32 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var assignDropletPath = assignDropletsPath + $"/{appGuid}" + $"/{dropletGuid}";
+                var assignDropletPath = setDropletForAppPath.Replace(":guid", appGuid);
 
                 var uri = new UriBuilder(cfTarget)
                 {
                     Path = assignDropletPath
                 };
 
-                //find PATCH    
-                var request = new HttpRequestMessage(new HttpMethod("PATCH"), uri.ToString());
+                string json = JsonConvert.SerializeObject(new
+                {
+                    data = new
+                    {
+                        guid = dropletGuid
+                    }
+                });
+
+                var request = new HttpRequestMessage(new HttpMethod("PATCH"), uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
+                request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from PATCH `{assignDropletPath}` was {response.StatusCode}");
+                if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from PATCH `{assignDropletPath}` was {response.StatusCode}");
 
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
+                return true;
             }
             catch (Exception e)
             {

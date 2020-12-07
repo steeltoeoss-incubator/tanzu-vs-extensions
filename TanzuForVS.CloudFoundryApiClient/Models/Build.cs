@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TanzuForVS.CloudFoundryApiClient.Models
+namespace TanzuForVS.CloudFoundryApiClient.Models.Build
 {
     public class Build
     {
@@ -11,8 +11,8 @@ namespace TanzuForVS.CloudFoundryApiClient.Models
         public string state { get; set; }
         public object error { get; set; }
         public Lifecycle lifecycle { get; set; }
-        public Package package { get; set; }
-        public object droplet { get; set; }
+        public Guid package { get; set; }
+        public Guid droplet { get; set; }
         public Relationships relationships { get; set; }
         public Metadata metadata { get; set; }
         public Links links { get; set; }
@@ -37,24 +37,14 @@ namespace TanzuForVS.CloudFoundryApiClient.Models
         public string stack { get; set; }
     }
 
-    public class Package
-    {
-        public string guid { get; set; }
-    }
-
     public class Relationships
     {
-        public AppData app { get; set; } // TODO: this makes "App" an ambiguous reference; figure out some way to disambiguate between this "app" and the full app model
+        public AppData app { get; set; }
     }
 
     public class AppData
     {
-        public Data1 data { get; set; }
-    }
-
-    public class Data1
-    {
-        public string guid { get; set; }
+        public Guid data { get; set; }
     }
 
     public class Metadata
@@ -73,18 +63,9 @@ namespace TanzuForVS.CloudFoundryApiClient.Models
 
     public class Links
     {
-        public Self self { get; set; }
-        public App1 app { get; set; }
-    }
-
-    public class Self
-    {
-        public string href { get; set; }
-    }
-
-    public class App1
-    {
-        public string href { get; set; }
+        public Href self { get; set; }
+        public Href app { get; set; }
     }
 
 }
+
