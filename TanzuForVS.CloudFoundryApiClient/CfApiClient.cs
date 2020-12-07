@@ -26,7 +26,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string deleteAppsPath = "/v3/apps";
         internal static readonly string createAppsPath = "/v3/apps";
         internal static readonly string createPackagesPath = "/v3/packages";
-        internal static readonly string uplaodBitsPath = "v3/packages/:guid/upload";
+        internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string getBuildPath = "/v3/builds";
         internal static readonly string setDropletForAppPath = "/v3/apps/:guid/relationships/current_droplet";
@@ -475,6 +475,7 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
+        // TODO: finish this method (needs tests too)
         /// <summary>
         /// Upload package bits: POST /v3/packages/:guid/upload
         /// </summary>
@@ -483,37 +484,37 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="pckgBits"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public async Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path)
-        {
-            try
-            {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+        //public async Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path)
+        //{
+        //    try
+        //    {
+        //        // trust any certificate
+        //        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        //        ServicePointManager.ServerCertificateValidationCallback +=
+        //            (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                var uplaodBitPath = uplaodBitsPath + $"/{pckgBits}" + $"/{path}";
+        //        var uplaodBitPath = uploadBitsPath + $"/{pckgBits}" + $"/{path}";
 
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = uplaodBitPath
-                };
+        //        var uri = new UriBuilder(cfTarget)
+        //        {
+        //            Path = uplaodBitPath
+        //        };
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
+        //        var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+        //        request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-                var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{uplaodBitPath}` was {response.StatusCode}");
+        //        var response = await _httpClient.SendAsync(request);
+        //        if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{uplaodBitPath}` was {response.StatusCode}");
 
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
-        }
+        //        if (response.StatusCode == HttpStatusCode.Accepted) return true;
+        //        return false;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        System.Diagnostics.Debug.WriteLine(e);
+        //        return false;
+        //    }
+        //}
 
         /// <summary>
         /// Create a new build: POST /v3/builds
