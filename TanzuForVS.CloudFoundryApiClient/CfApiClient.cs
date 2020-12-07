@@ -336,6 +336,13 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
+        /// <summary>
+        /// Delete an App: DELETE /v3/apps/:guid
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="appGuid"></param>
+        /// <returns></returns>
         public async Task<bool> DeleteAppWithGuid(string cfTarget, string accessToken, string appGuid)
         {
             try
@@ -368,9 +375,13 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-
-        //create an app POST v3/apps
-        public async Task<bool> CreateApp(string cfTarget, string accessToken, string appGuid)
+        /// <summary>
+        /// Create an App: POST /v3/apps
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async Task<bool> CreateApp(string cfTarget, string accessToken)
         {
             try
             {
@@ -379,8 +390,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 ServicePointManager.ServerCertificateValidationCallback +=
                     (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-                //does a guid need to be assigned?
-                var createAppPath = createAppsPath + $"/{appGuid}";
+                var createAppPath = createAppsPath;
 
                 var uri = new UriBuilder(cfTarget)
                 {
@@ -403,7 +413,13 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        //create Pckg POST v3/packages
+        /// <summary>
+        /// Create a Package: POST /v3/packages
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="spaceGuid"></param>
+        /// <returns></returns>
         public async Task<bool> CreateAppPackage(string cfTarget, string accessToken, string spaceGuid)
         {
             try
@@ -436,42 +452,14 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        //TODO
-        //create temp .zip file
-        //delete .zip file
-        public async Task<bool> CreateTempZip(string cfTarget, string accessToken, string appGuid)
-        {
-            try
-            {
-                // trust any certificate
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => { return true; };
-
-                var deleteAppPath = deleteAppsPath + $"/{appGuid}";
-
-                var uri = new UriBuilder(cfTarget)
-                {
-                    Path = deleteAppPath
-                };
-
-                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
-                request.Headers.Add("Authorization", "Bearer " + accessToken);
-
-                var response = await _httpClient.SendAsync(request);
-                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from DELETE `{deleteAppPath}` was {response.StatusCode}");
-
-                if (response.StatusCode == HttpStatusCode.Accepted) return true;
-                return false;
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e);
-                return false;
-            }
-        }
-
-        //upload app bits POST v3/packages/:guid/upload
+        /// <summary>
+        /// Upload package bits: POST /v3/packages/:guid/upload
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="pckgBits"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public async Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path)
         {
             try
@@ -504,8 +492,14 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        //create build POST v3/builds
-        public async Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid)
+        /// <summary>
+        /// Create a new build: POST /v3/builds
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="pckgGuid"></param>
+        /// <returns></returns>
+        public async Task<Build> CreateBuildAsync(string cfTarget, string accessToken, string pckgGuid)
         {
             try
             {
@@ -521,7 +515,6 @@ namespace TanzuForVS.CloudFoundryApiClient
                     Path = createBuildPath
                 };
 
-                // TODO: make sure we have application/json header + any other headers (look at uaa client login method for help)
                 string json = JsonConvert.SerializeObject(new
                 {
                     package = new
@@ -531,7 +524,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 });
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-                request.Content = new StringContent(json, Encoding.UTF8, "applicaiton/json"); ;
+                request.Content = new StringContent(json, Encoding.UTF8, "applicaiton/json"); 
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
@@ -550,7 +543,14 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        //assign droplet PATCH /v3/apps/:guid/relationships/current_droplet
+        /// <summary>
+        /// Set the current droplet for an app: PATCH /v3/apps/:guid/relationships/current_droplet
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="appGuid"></param>
+        /// <param name="dropletGuid"></param>
+        /// <returns></returns>
         public async Task<bool> AssignDroplet(string cfTarget, string accessToken, string appGuid, string dropletGuid)
         {
             try
@@ -585,7 +585,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         }
 
         /// <summary>
-        /// Get info about a Build via GET /v3/builds/${BUILD_GUID}
+        /// Get info about a Build: GET /v3/builds/:guid
         /// </summary>
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>

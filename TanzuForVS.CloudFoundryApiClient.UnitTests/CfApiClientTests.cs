@@ -532,7 +532,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var fakeBuildGuid = "my fake guid";
             string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
 
-            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+            MockedRequest getBuildRequest = _mockHttp.Expect(expectedPath)
                .Throw(new Exception("fake error message indicating that the http request errored"));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
@@ -540,15 +540,16 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var build = await _sut.GetBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
            
             Assert.IsNull(build);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getBuildRequest));
         }
-        
+
         [TestMethod]
         public async Task GetBuildAsync_ReturnsNull_WhenResponseCodeIsNot200()
         {
             var fakeBuildGuid = "my fake guid";
             string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
 
-            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+            MockedRequest getBuildRequest = _mockHttp.Expect(expectedPath)
                .Respond(HttpStatusCode.BadRequest);
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
@@ -556,23 +557,23 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             var build = await _sut.GetBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
 
             Assert.IsNull(build);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getBuildRequest));
         }
 
         [TestMethod]
-        public async Task GetBuildAsync_ReturnsBuild_WhenItSucceeds()
+        public async Task GetBuildAsync_ReturnsBuild_WhenResponseCodeIs200()
         {
             var fakeBuildGuid = "my fake guid";
             string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
 
-            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+            MockedRequest getBuildRequest = _mockHttp.Expect(expectedPath)
                .Respond("application/json", JsonConvert.SerializeObject(new Build{ guid = "fake build guid"}));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             var build = await _sut.GetBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
-
             
-            Assert.AreEqual(1, _mockHttp.GetMatchCount(createBuildRequest));
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getBuildRequest));
             Assert.IsNotNull(build);
             Assert.AreEqual(build.guid, "fake build guid");  
         }
@@ -580,19 +581,57 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         [TestMethod]
         public async Task CreateBuildAsync_ReturnsNull_WhenAnExceptionIsThrown()
         {
-            Assert.Fail("NYI");
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createBuildsPath;
+
+            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createBuildRequest));
         }
-        
+
         [TestMethod]
         public async Task CreateBuildAsync_ReturnsNull_WhenResponseCodeIsNot201()
         {
-            Assert.Fail("NYI");
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createBuildsPath;
+
+            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createBuildRequest));
         }
                 
         [TestMethod]
         public async Task CreateBuildAsync_ReturnsABuild_WhenResponseCodeIs201()
         {
-            Assert.Fail("NYI");
+            var fakePackageGuid = "my fake guid";
+            const string fakeBuildGuid = "fake build guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createBuildsPath;
+
+            MockedRequest createBuildRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Created, "application/json", JsonConvert.SerializeObject(new Build { guid = fakeBuildGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateBuildAsync(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createBuildRequest));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.guid, fakeBuildGuid);
         }
 
         //TODO: Tests for new deploy api endpoints
