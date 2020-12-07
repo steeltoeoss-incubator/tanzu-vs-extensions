@@ -3,6 +3,7 @@ using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.Route;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests

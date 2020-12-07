@@ -11,6 +11,7 @@ using TanzuForVS.CloudFoundryApiClient.Models.Token;
 using TanzuForVS.CloudFoundryApiClient.Models;
 using TanzuForVS.CloudFoundryApiClient.Models.Build;
 using TanzuForVS.CloudFoundryApiClient.Models.Package;
+using TanzuForVS.CloudFoundryApiClient.Models.Route;
 
 namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 {
@@ -798,5 +799,74 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(setDropletRequest));
             Assert.IsTrue(result);
         }
+
+        [TestMethod]
+        public async Task CreateRoute_ReturnsNull_WhenAnExceptionIsThrown()
+        {
+            const string fakeSpaceGuid = "fake space guid";
+            const string fakeDomainGuid = "fake domain guid";
+            const string fakeHost = "fake hostname";
+            const string fakePath = "fake path";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createRoutesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateRoute(_fakeCfApiAddress, _fakeAccessToken, fakeSpaceGuid, fakeDomainGuid, fakeHost, fakePath, fakePort);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+        }
+        
+        [TestMethod]
+        public async Task CreateRoute_ReturnsNull_WhenResponseCodeIsNot201()
+        {
+            const string fakeSpaceGuid = "fake space guid";
+            const string fakeDomainGuid = "fake domain guid";
+            const string fakeHost = "fake hostname";
+            const string fakePath = "fake path";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createRoutesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+                .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateRoute(_fakeCfApiAddress, _fakeAccessToken, fakeSpaceGuid, fakeDomainGuid, fakeHost, fakePath, fakePort);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+        }
+
+        [TestMethod]
+        public async Task CreateRoute_ReturnsRoute_WhenResponseCodeIs201()
+        {
+            const string fakeRouteGuid = "my fake guid";
+            const string fakeSpaceGuid = "fake space guid";
+            const string fakeDomainGuid = "fake domain guid";
+            const string fakeHost = "fake hostname";
+            const string fakePath = "fake path";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.createRoutesPath;
+
+            MockedRequest createPackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Created, "application/json", JsonConvert.SerializeObject(new Route { guid = fakeRouteGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.CreateRoute(_fakeCfApiAddress, _fakeAccessToken, fakeSpaceGuid, fakeDomainGuid, fakeHost, fakePath, fakePort);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
+        }
+
+
     }
 }

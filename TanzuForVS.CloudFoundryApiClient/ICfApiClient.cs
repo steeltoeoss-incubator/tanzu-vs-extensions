@@ -4,6 +4,7 @@ using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Build;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Package;
+using TanzuForVS.CloudFoundryApiClient.Models.Route;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
@@ -25,6 +26,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<bool> SetDropletForApp(string cfTarget, string accessToken, string appGuid, string dropletGuid);
         Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
         Task<Build> GetBuild(string cfTarget, string accessToken, string buildGuid);
+        Task<Route> CreateRoute(string cfTarget, string accessToken, string spaceGuid, string domainGuid, string host, string path, int port);
         //Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path); // TODO: finish this method
     }
 }

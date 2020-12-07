@@ -12,6 +12,7 @@ using TanzuForVS.CloudFoundryApiClient.Models.BasicInfoResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Build;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.Package;
+using TanzuForVS.CloudFoundryApiClient.Models.Route;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 
 namespace TanzuForVS.CloudFoundryApiClient
@@ -28,6 +29,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string createPackagesPath = "/v3/packages";
         internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
+        internal static readonly string createRoutesPath = "/v3/routes";
         internal static readonly string getBuildPath = "/v3/builds";
         internal static readonly string setDropletForAppPath = "/v3/apps/:guid/relationships/current_droplet";
 
@@ -659,5 +661,59 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
+        public async Task<Route> CreateRoute(string cfTarget, string accessToken, string spaceGuid, string domainGuid, string host, string path, int port)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = createRoutesPath
+                };
+
+                string json = JsonConvert.SerializeObject(new
+                {
+                    host = host,
+                    path = path,
+                    port = port,
+                    relationships = new
+                    {
+                        domain = new
+                        {
+                            data = new { guid = domainGuid }
+                        },
+                        space = new
+                        {
+                            data = new { guid = spaceGuid }
+                        }
+                    }
+                });
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
+                request.Headers.Add("Accept", "application/json");
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createRoutesPath}` was {response.StatusCode}");
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var route = JsonConvert.DeserializeObject<Route>(responseContent);
+
+                return route;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+        }
     }
 }
