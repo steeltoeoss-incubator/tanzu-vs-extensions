@@ -29,6 +29,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
         Task<Build> GetBuild(string cfTarget, string accessToken, string buildGuid);
         Task<Route> CreateRoute(string cfTarget, string accessToken, string spaceGuid, string domainGuid, string host, string path, int port);
+        Task<bool> DeleteRoute(string cfTarget, string accessToken, string routeGuid);
         Task<bool> AddDestinationToRoute(string cfTarget, string accessToken, string routeGuid, string appGuid, string processType, int port);
         //Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path); // TODO: finish this method
     }

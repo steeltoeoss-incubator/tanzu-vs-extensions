@@ -32,6 +32,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string createRoutesPath = "/v3/routes";
+        internal static readonly string deleteRoutePath = "/v3/routes/:guid";
         internal static readonly string getBuildPath = "/v3/builds";
         internal static readonly string setDropletForAppPath = "/v3/apps/:guid/relationships/current_droplet";
         internal static readonly string addDestinationToRoutePath = "/v3/routes/:guid/destinations";
@@ -796,6 +797,35 @@ namespace TanzuForVS.CloudFoundryApiClient
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
+            }
+        }
+        
+        public async Task<bool> DeleteRoute(string cfTarget, string accessToken, string routeGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = deleteRoutePath.Replace(":guid", routeGuid)
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{deleteRoutePath}` was {response.StatusCode}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
             }
         }
 

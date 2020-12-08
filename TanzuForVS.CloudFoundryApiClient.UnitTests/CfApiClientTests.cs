@@ -977,6 +977,60 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         }
 
         [TestMethod]
+        public async Task DeleteRoute_ReturnsFalse_WhenAnExceptionIsThrown()
+        {
+            var fakeRouteGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest deleteRouteRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeleteRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deleteRouteRequest));
+        }
+
+        [TestMethod]
+        public async Task DeleteRoute_ReturnsFalse_WhenResponseCodeIsNot202()
+        {
+            var fakeRouteGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest deleteRouteRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeleteRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deleteRouteRequest));
+        }
+
+        [TestMethod]
+        public async Task DeleteRoute_ReturnsTrue_WhenResponseCodeIs202()
+        {
+            var fakeRouteGuid = "fake route guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deleteRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest deleteRouteRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Accepted, "application/json", JsonConvert.SerializeObject(new Route { guid = fakeRouteGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeleteRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deleteRouteRequest));
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
         public async Task AddDestinationToRoute_ReturnsFalse_WhenAnExceptionIsThrown()
         {
             const string fakeRouteGuid = "fake route guid";
