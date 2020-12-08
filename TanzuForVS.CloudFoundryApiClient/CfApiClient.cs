@@ -32,6 +32,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string createRoutesPath = "/v3/routes";
         internal static readonly string getBuildPath = "/v3/builds";
         internal static readonly string setDropletForAppPath = "/v3/apps/:guid/relationships/current_droplet";
+        internal static readonly string addDestinationToRoutePath = "/v3/routes/:guid/destinations";
 
         public static readonly string defaultAuthClientId = "cf";
         public static readonly string defaultAuthClientSecret = "";
@@ -661,6 +662,17 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
+        /// <summary>
+        /// Create a Route: POST /v3/routes
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="spaceGuid"></param>
+        /// <param name="domainGuid"></param>
+        /// <param name="host"></param>
+        /// <param name="path"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public async Task<Route> CreateRoute(string cfTarget, string accessToken, string spaceGuid, string domainGuid, string host, string path, int port)
         {
             try
@@ -713,6 +725,71 @@ namespace TanzuForVS.CloudFoundryApiClient
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Creating a Destination to link a Route to an App: POST /v3/routes/:guid/destinations
+        /// This endpoint *inserts* a new Destination for a Route & cannot add weighted Destinations.
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="routeGuid"></param>
+        /// <param name="appGuid"></param>
+        /// <param name="processType"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public async Task<bool> AddDestinationToRoute(string cfTarget, string accessToken, string routeGuid, string appGuid, string processType, int port)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var addDestinationPath = addDestinationToRoutePath.Replace(":guid", routeGuid);
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = addDestinationPath
+                };
+
+                string json = JsonConvert.SerializeObject(new
+                {
+                    destinations = new[]
+                    {
+                        new
+                        {
+                            app = new
+                            {
+                                guid = appGuid,
+                                process = new
+                                {
+                                    type = processType
+                                }
+                            },
+                            port = port
+                        }
+                    }
+                });
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
+                request.Headers.Add("Accept", "application/json");
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from POST `{addDestinationPath}` was {response.StatusCode}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
             }
         }
     }

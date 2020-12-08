@@ -591,7 +591,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             var build = await _sut.GetBuild(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
-           
+
             Assert.IsNull(build);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(getBuildRequest));
         }
@@ -620,15 +620,15 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             string expectedPath = _fakeCfApiAddress + CfApiClient.getBuildPath + $"/{fakeBuildGuid}";
 
             MockedRequest getBuildRequest = _mockHttp.Expect(expectedPath)
-               .Respond("application/json", JsonConvert.SerializeObject(new Build{ guid = "fake build guid"}));
+               .Respond("application/json", JsonConvert.SerializeObject(new Build { guid = "fake build guid" }));
 
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             var build = await _sut.GetBuild(_fakeCfApiAddress, _fakeAccessToken, fakeBuildGuid);
-            
+
             Assert.AreEqual(1, _mockHttp.GetMatchCount(getBuildRequest));
             Assert.IsNotNull(build);
-            Assert.AreEqual(build.guid, "fake build guid");  
+            Assert.AreEqual(build.guid, "fake build guid");
         }
 
         [TestMethod]
@@ -666,7 +666,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(createBuildRequest));
         }
-                
+
         [TestMethod]
         public async Task CreateBuild_ReturnsABuild_WhenResponseCodeIs201()
         {
@@ -686,7 +686,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(result.guid, fakeBuildGuid);
         }
-        
+
         [TestMethod]
         public async Task CreatePackage_ReturnsNull_WhenAnExceptionIsThrown()
         {
@@ -722,7 +722,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
         }
-                
+
         [TestMethod]
         public async Task CreatePackage_ReturnsAPackage_WhenResponseCodeIs201()
         {
@@ -753,7 +753,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
 
             MockedRequest setDropletRequest = _mockHttp.Expect(expectedPath)
                .Throw(new Exception("fake error message indicating that the http request errored"));
-            
+
             _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
 
             var result = await _sut.SetDropletForApp(_fakeCfApiAddress, _fakeAccessToken, fakeAppGuid, fakeDropletGuid);
@@ -821,7 +821,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNull(result);
             Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
         }
-        
+
         [TestMethod]
         public async Task CreateRoute_ReturnsNull_WhenResponseCodeIsNot201()
         {
@@ -867,6 +867,68 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(createPackageRequest));
         }
 
+        [TestMethod]
+        public async Task AddDestinationToRoute_ReturnsFalse_WhenAnExceptionIsThrown()
+        {
+            const string fakeRouteGuid = "fake route guid";
+            const string fakeAppGuid = "fake app guid";
+            const string fakeProcessType = "fake process type";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.addDestinationToRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest addDestinationRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.AddDestinationToRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid, fakeAppGuid, fakeProcessType, fakePort);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(addDestinationRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task AddDestinationToRoute_ReturnsFalse_WhenResponseCodeIsNot200()
+        {
+            const string fakeRouteGuid = "fake route guid";
+            const string fakeAppGuid = "fake app guid";
+            const string fakeProcessType = "fake process type";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.addDestinationToRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest addDestinationRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.AddDestinationToRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid, fakeAppGuid, fakeProcessType, fakePort);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(addDestinationRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task AddDestinationToRoute_ReturnsTrue_WhenResponseCodeIs200()
+        {
+            const string fakeRouteGuid = "fake route guid";
+            const string fakeAppGuid = "fake app guid";
+            const string fakeProcessType = "fake process type";
+            const int fakePort = 12345;
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.addDestinationToRoutePath.Replace(":guid", fakeRouteGuid);
+
+            MockedRequest addDestinationRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.OK);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.AddDestinationToRoute(_fakeCfApiAddress, _fakeAccessToken, fakeRouteGuid, fakeAppGuid, fakeProcessType, fakePort);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(addDestinationRequest));
+            Assert.IsTrue(result);
+        }
 
     }
 }
