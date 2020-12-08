@@ -27,6 +27,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string deleteAppsPath = "/v3/apps";
         internal static readonly string createAppsPath = "/v3/apps";
         internal static readonly string createPackagesPath = "/v3/packages";
+        internal static readonly string getPackagePath = "/v3/packages/:guid";
         internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string createRoutesPath = "/v3/routes";
@@ -465,6 +466,46 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var response = await _httpClient.SendAsync(request);
                 if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createPackagesPath}` was {response.StatusCode}");
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                var package = JsonConvert.DeserializeObject<Package>(responseContent);
+
+                return package;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get a Package by guid: GET /v3/packages/:guid
+        /// </summary>
+        /// <param name="cfTarget"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="packageGuid"></param>
+        /// <returns></returns>
+        public async Task<Package> GetPackage(string cfTarget, string accessToken, string packageGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = getPackagePath.Replace(":guid", packageGuid)
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Get, uri.ToString());
+                request.Headers.Add("Accept", "application/json");
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from POST `{getPackagePath}` was {response.StatusCode}");
 
                 string responseContent = await response.Content.ReadAsStringAsync();
                 var package = JsonConvert.DeserializeObject<Package>(responseContent);

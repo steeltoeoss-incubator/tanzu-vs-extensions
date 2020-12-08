@@ -744,6 +744,61 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
         }
 
         [TestMethod]
+        public async Task GetPackage_ReturnsNull_WhenAnExceptionIsThrown()
+        {
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.getPackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest getPackageRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.GetPackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getPackageRequest));
+        }
+
+        [TestMethod]
+        public async Task GetPackage_ReturnsNull_WhenResponseCodeIsNot200()
+        {
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.getPackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest getPackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.GetPackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsNull(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getPackageRequest));
+        }
+
+        [TestMethod]
+        public async Task GetPackage_ReturnsAPackage_WhenResponseCodeIs200()
+        {
+            var fakePackageGuid = "fake package guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.getPackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest getPackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.OK, "application/json", JsonConvert.SerializeObject(new Package { guid = fakePackageGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.GetPackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(getPackageRequest));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.guid, fakePackageGuid);
+        }
+
+        [TestMethod]
         public async Task SetDropletForApp_ReturnsFalse_WhenAnExceptionIsThrown()
         {
             const string fakeAppGuid = "fake app guid";
