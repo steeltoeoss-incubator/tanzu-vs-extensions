@@ -24,6 +24,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         Task<App> CreateApp(string cfTarget, string accessToken);
         Task<Package> CreatePackage(string cfTarget, string accessToken, string appGuid);
         Task<Package> GetPackage(string cfTarget, string accessToken, string packageGuid);
+        Task<bool> DeletePackage(string cfTarget, string accessToken, string packageGuid);
         Task<bool> SetDropletForApp(string cfTarget, string accessToken, string appGuid, string dropletGuid);
         Task<Build> CreateBuild(string cfTarget, string accessToken, string pckgGuid);
         Task<Build> GetBuild(string cfTarget, string accessToken, string buildGuid);

@@ -797,6 +797,60 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(result.guid, fakePackageGuid);
         }
+        
+        [TestMethod]
+        public async Task DeletePackage_ReturnsFalse_WhenAnExceptionIsThrown()
+        {
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deletePackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest deletePackageRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeletePackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deletePackageRequest));
+        }
+
+        [TestMethod]
+        public async Task DeletePackage_ReturnsFalse_WhenResponseCodeIsNot202()
+        {
+            var fakePackageGuid = "my fake guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deletePackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest deletePackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeletePackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deletePackageRequest));
+        }
+
+        [TestMethod]
+        public async Task DeletePackage_ReturnsTrue_WhenResponseCodeIs202()
+        {
+            var fakePackageGuid = "fake package guid";
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.deletePackagePath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest deletePackageRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.Accepted, "application/json", JsonConvert.SerializeObject(new Package { guid = fakePackageGuid }));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.DeletePackage(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(deletePackageRequest));
+            Assert.IsTrue(result);
+        }
 
         [TestMethod]
         public async Task SetDropletForApp_ReturnsFalse_WhenAnExceptionIsThrown()

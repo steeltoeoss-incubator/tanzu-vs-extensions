@@ -28,6 +28,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string createAppsPath = "/v3/apps";
         internal static readonly string createPackagesPath = "/v3/packages";
         internal static readonly string getPackagePath = "/v3/packages/:guid";
+        internal static readonly string deletePackagePath = "/v3/packages/:guid";
         internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string createRoutesPath = "/v3/routes";
@@ -516,6 +517,35 @@ namespace TanzuForVS.CloudFoundryApiClient
             {
                 System.Diagnostics.Debug.WriteLine(e);
                 return null;
+            }
+        }
+
+        public async Task<bool> DeletePackage(string cfTarget, string accessToken, string packageGuid)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
+
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = deletePackagePath.Replace(":guid", packageGuid)
+                };
+
+                var request = new HttpRequestMessage(HttpMethod.Delete, uri.ToString());
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{deletePackagePath}` was {response.StatusCode}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
             }
         }
 
