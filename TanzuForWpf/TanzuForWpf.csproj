@@ -112,6 +112,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{9486BBEE-472D-4D0A-9644-A34151F66F62}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Services\Services.csproj">
       <Project>{743bfc55-6c1f-4d0d-8d7e-c66a2c8ed917}</Project>
       <Name>Services</Name>

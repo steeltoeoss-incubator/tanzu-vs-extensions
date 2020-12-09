@@ -6,8 +6,8 @@ namespace TanzuForWpf
     public interface IMainWindowViewModel : IViewModel
     {
         bool CanOpenCloudExplorer(object arg);
+        bool CanOpenDeploymentDialog(object arg);
         void OpenCloudExplorer(object arg);
-        bool CanDeployApp(object arg);
-        Task DeployApp(object arg);
+        void OpenDeploymentDialog(object arg);
     }
 }

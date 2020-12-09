@@ -63,12 +63,20 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeploymentDialogView.xaml.cs">
+      <DependentUpon>DeploymentDialogView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\AsyncDelegatingCommand.cs" />
+    <Compile Include="IDeploymentDialogView.cs" />
     <Compile Include="ICloudExplorerView.cs" />
     <Compile Include="IAddCloudDialogView.cs" />
     <Compile Include="Services\WpfDialogResult.cs" />
     <Compile Include="Services\WpfDialogService.cs" />
     <Compile Include="Services\WpfViewLocatorService.cs" />
+    <Page Include="DeploymentDialogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="CloudExplorerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

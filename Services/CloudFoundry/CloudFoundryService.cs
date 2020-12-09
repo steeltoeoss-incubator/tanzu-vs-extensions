@@ -144,9 +144,9 @@ namespace TanzuForVS.Services.CloudFoundry
             {
                 var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
                 var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
-                
+
                 bool appWasStopped = await _cfApiClient.StopAppWithGuid(target, token, app.AppId);
-                
+
                 if (appWasStopped) app.State = "STOPPED";
                 return appWasStopped;
             }
@@ -197,21 +197,27 @@ namespace TanzuForVS.Services.CloudFoundry
 
         public async Task<bool> DeployAppAsync()
         {
-            //try
-            //{
-            //    var target = app.ParentSpace.ParentOrg.ParentCf.ApiAddress;
-            //    var token = app.ParentSpace.ParentOrg.ParentCf.AccessToken;
+            //Create an App via POST / v3 / apps(docs)
+            //Create a Package via POST / v3 / packages(docs)
+            //Must include the app guid in the body of this request(relationships.app.data.guid)
+            //Create a temporary.zip file on the user's OS containing app binaries
+            //I'm unclear on exactly which files need to be in this .zip for .NET apps to be pushed to CF...
+            //Upload app bits via POST / v3 / packages /:guid / upload(docs)
+            //Must include the package guid in the query for this request
+            //Delete temporary.zip file
+            //Create a Build via POST / v3 / builds(docs)
+            //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
+            //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
 
-            //    bool appWasDeploy = await _cfApiClient.DeployAppWithGuid(target, token, app.AppId);
 
-            //    if (appWasDeployed) app.State = "DEPLOYED";
-            //    return appWasDeployed;
-            //}
-            //catch (Exception e)
-            //{
-            //    System.Diagnostics.Debug.WriteLine(e);
-            //    return false;
-            //}
+            // TODO: test that if ActiveCloud is not set, return false
+            if (ActiveCloud == null)
+            {
+                System.Diagnostics.Debug.WriteLine("ActiveCloud not set");
+                return false;
+            }
+
+            var newApp = await _cfApiClient.CreateApp(ActiveCloud.ApiAddress, ActiveCloud.AccessToken);
             return false;
         }
 

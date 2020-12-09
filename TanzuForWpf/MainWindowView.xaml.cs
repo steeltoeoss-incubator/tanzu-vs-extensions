@@ -17,12 +17,12 @@ namespace TanzuForWpf
         public MainWindowView(IMainWindowViewModel viewModel)
         {
             OpenCloudExplorerCommand = new DelegatingCommand(viewModel.OpenCloudExplorer, viewModel.CanOpenCloudExplorer);
-            DeployAppCommand = new AsyncDelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
+            OpenDeploymentDialogCommand = new DelegatingCommand(viewModel.OpenDeploymentDialog, viewModel.CanOpenDeploymentDialog);
             DataContext = viewModel;
             InitializeComponent();
         }
 
         public ICommand OpenCloudExplorerCommand { get; }
-        public ICommand DeployAppCommand { get; }
+        public ICommand OpenDeploymentDialogCommand { get; }
     }
 }

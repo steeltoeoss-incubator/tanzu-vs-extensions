@@ -52,6 +52,9 @@ namespace TanzuForWpf
             services.AddTransient<ICloudExplorerViewModel, CloudExplorerViewModel>();
             services.AddTransient<ICloudExplorerView, CloudExplorerView>();
 
+            services.AddTransient<IDeploymentDialogViewModel, DeploymentDialogViewModel>();
+            services.AddTransient<IDeploymentDialogView, DeploymentDialogView>();
+
             services.AddTransient<IAddCloudDialogViewModel, AddCloudDialogViewModel>();
             services.AddTransient<IAddCloudDialogView, AddCloudDialogView>();
 
