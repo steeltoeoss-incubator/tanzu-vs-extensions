@@ -1,4 +1,5 @@
-﻿using TanzuForVS.ViewModels;
+﻿using System.Threading.Tasks;
+using TanzuForVS.ViewModels;
 
 namespace TanzuForWpf
 {
@@ -6,5 +7,7 @@ namespace TanzuForWpf
     {
         bool CanOpenCloudExplorer(object arg);
         void OpenCloudExplorer(object arg);
+        bool CanDeployApp(object arg);
+        Task DeployApp(object arg);
     }
 }

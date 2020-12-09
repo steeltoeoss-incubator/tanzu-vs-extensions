@@ -18,6 +18,6 @@ namespace TanzuForVS.Services.CloudFoundry
         Task<bool> StopAppAsync(CloudFoundryApp app);
         Task<bool> StartAppAsync(CloudFoundryApp app);
         Task<bool> DeleteAppAsync(CloudFoundryApp app);
-        //Task<bool> DeployAppAsync(CloudFoundryApp app); // TODO: this
+        Task<bool> DeployAppAsync();
     }
 }

@@ -18,6 +18,12 @@
                 <ListBoxItem>
                     <Button Content="Open Cloud Explorer" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command ="{ Binding ElementName=MainWindowElement, Path=OpenCloudExplorerCommand }"/>
                 </ListBoxItem>
+                <ListBoxItem>
+                    <Button Content="Test-deploy 'ConsoleApp1'" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Command ="{ Binding ElementName=MainWindowElement, Path=DeployAppCommand }"/>
+                </ListBoxItem>
+                <ListBoxItem>
+                    <TextBlock Text="{Binding Path=DeploymentStatus}" Background="Turquoise"/>
+                </ListBoxItem>
             </ListBox>
         </Grid>
         <ContentControl Grid.Column="1" Content="{Binding ActiveView}" HorizontalAlignment="Center" VerticalAlignment="Center" />
