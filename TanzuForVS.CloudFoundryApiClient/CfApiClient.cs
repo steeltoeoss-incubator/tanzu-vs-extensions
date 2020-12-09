@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -29,7 +30,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         internal static readonly string createPackagesPath = "/v3/packages";
         internal static readonly string getPackagePath = "/v3/packages/:guid";
         internal static readonly string deletePackagePath = "/v3/packages/:guid";
-        internal static readonly string uploadBitsPath = "v3/packages/:guid/upload";
+        internal static readonly string uploadBitsPath = "/v3/packages/:guid/upload";
         internal static readonly string createBuildsPath = "/v3/builds";
         internal static readonly string createRoutesPath = "/v3/routes";
         internal static readonly string deleteRoutePath = "/v3/routes/:guid";
@@ -550,46 +551,49 @@ namespace TanzuForVS.CloudFoundryApiClient
             }
         }
 
-        // TODO: finish this method (needs tests too)
         /// <summary>
         /// Upload package bits: POST /v3/packages/:guid/upload
         /// </summary>
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>
-        /// <param name="pckgBits"></param>
-        /// <param name="path"></param>
+        /// <param name="packageGuid"></param>
+        /// <param name="fileName"></param>
+        /// <param name="fileBytes"></param>
         /// <returns></returns>
-        //public async Task<bool> UploadBits(string cfTarget, string accessToken, string pckgBits, string path)
-        //{
-        //    try
-        //    {
-        //        // trust any certificate
-        //        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-        //        ServicePointManager.ServerCertificateValidationCallback +=
-        //            (sender, cert, chain, sslPolicyErrors) => { return true; };
+        public async Task<bool> UploadBits(string cfTarget, string accessToken, string packageGuid, string fileName, byte[] fileBytes)
+        {
+            try
+            {
+                // trust any certificate
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, cert, chain, sslPolicyErrors) => { return true; };
 
-        //        var uplaodBitPath = uploadBitsPath + $"/{pckgBits}" + $"/{path}";
+                var uri = new UriBuilder(cfTarget)
+                {
+                    Path = uploadBitsPath.Replace(":guid", packageGuid)
+                };
 
-        //        var uri = new UriBuilder(cfTarget)
-        //        {
-        //            Path = uplaodBitPath
-        //        };
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new MultipartFormDataContent
+                    {
+                        { new ByteArrayContent(fileBytes, 0, fileBytes.Length), "bits", fileName }
+                    }
+                };
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
 
-        //        var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
-        //        request.Headers.Add("Authorization", "Bearer " + accessToken);
+                var response = await _httpClient.SendAsync(request);
+                if (response.StatusCode != HttpStatusCode.OK) throw new Exception($"Response from POST `{uploadBitsPath}` was {response.StatusCode}");
 
-        //        var response = await _httpClient.SendAsync(request);
-        //        if (response.StatusCode != HttpStatusCode.Accepted) throw new Exception($"Response from POST `{uplaodBitPath}` was {response.StatusCode}");
-
-        //        if (response.StatusCode == HttpStatusCode.Accepted) return true;
-        //        return false;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        System.Diagnostics.Debug.WriteLine(e);
-        //        return false;
-        //    }
-        //}
+                return true;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e);
+                return false;
+            }
+        }
 
         /// <summary>
         /// Create a new build: POST /v3/builds
@@ -799,7 +803,7 @@ namespace TanzuForVS.CloudFoundryApiClient
                 return null;
             }
         }
-        
+
         public async Task<bool> DeleteRoute(string cfTarget, string accessToken, string routeGuid)
         {
             try

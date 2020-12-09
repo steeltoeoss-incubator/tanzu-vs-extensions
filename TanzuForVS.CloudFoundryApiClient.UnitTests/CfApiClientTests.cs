@@ -797,7 +797,7 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(result.guid, fakePackageGuid);
         }
-        
+
         [TestMethod]
         public async Task DeletePackage_ReturnsFalse_WhenAnExceptionIsThrown()
         {
@@ -1092,6 +1092,67 @@ namespace TanzuForVS.CloudFoundryApiClient.UnitTests
             Assert.AreEqual(1, _mockHttp.GetMatchCount(addDestinationRequest));
             Assert.IsTrue(result);
         }
+
+        [TestMethod]
+        public async Task UploadBits_ReturnsFalse_WhenAnExceptionIsThrown()
+        {
+            const string fakePackageGuid = "fake package guid";
+            const string fakeFileName = "fakeFilename.zip";
+            byte[] fakeFileBytes = new byte[] { 0x20, 0x20, 0x20, 0x20 };
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.uploadBitsPath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest uploadBitsRequest = _mockHttp.Expect(expectedPath)
+               .Throw(new Exception("fake error message indicating that the http request errored"));
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.UploadBits(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid, fakeFileName, fakeFileBytes);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(uploadBitsRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task UploadBits_ReturnsFalse_WhenResponseCodeIsNot200()
+        {
+            const string fakePackageGuid = "fake package guid";
+            const string fakeFileName = "fakeFilename.zip";
+            byte[] fakeFileBytes = new byte[] { 0x20, 0x20, 0x20, 0x20 };
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.uploadBitsPath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest uploadBitsRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.BadRequest);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.UploadBits(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid, fakeFileName, fakeFileBytes);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(uploadBitsRequest));
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task UploadBits_ReturnsTrue_WhenResponseCodeIs200()
+        {
+            const string fakePackageGuid = "fake package guid";
+            const string fakeFileName = "fakeFilename.zip";
+            byte[] fakeFileBytes = new byte[] { 0x20, 0x20, 0x20, 0x20 };
+
+            string expectedPath = _fakeCfApiAddress + CfApiClient.uploadBitsPath.Replace(":guid", fakePackageGuid);
+
+            MockedRequest uploadBitsRequest = _mockHttp.Expect(expectedPath)
+               .Respond(HttpStatusCode.OK);
+
+            _sut = new CfApiClient(_mockUaaClient.Object, _mockHttp.ToHttpClient());
+
+            var result = await _sut.UploadBits(_fakeCfApiAddress, _fakeAccessToken, fakePackageGuid, fakeFileName, fakeFileBytes);
+
+            Assert.AreEqual(1, _mockHttp.GetMatchCount(uploadBitsRequest));
+            Assert.IsTrue(result);
+        }
+
 
     }
 }
