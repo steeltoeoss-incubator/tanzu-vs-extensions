@@ -11,14 +11,14 @@ namespace TanzuForVS.ViewModels
             : base(services)
         {
             DeploymentStatus = "Deployment hasn't started yet.";
+            updateCfInstances();
 
-            //CfInstances = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
-            CfInstances = new List<CloudFoundryInstance>
-            {
-                new CloudFoundryInstance("name 1", "address 1", "token 1"),
-                new CloudFoundryInstance("name 2", "address 2", "token 2"),
-                new CloudFoundryInstance("name 3", "address 3", "token 3")
-            };
+            //CfInstances = new List<CloudFoundryInstance>
+            //{
+            //    new CloudFoundryInstance("name 1", "address 1", "token 1"),
+            //    new CloudFoundryInstance("name 2", "address 2", "token 2"),
+            //    new CloudFoundryInstance("name 3", "address 3", "token 3")
+            //};
 
         }
 
@@ -81,5 +81,25 @@ namespace TanzuForVS.ViewModels
                 DeploymentStatus = $"An error occurred: \n{e}";
             }
         }
+
+
+        // TODO: Consolidate duplicate code: these methods already live on CloudExplorerViewModel
+        // (maybe pull up to base view model class?)
+        public bool CanOpenLoginView(object arg)
+        {
+            return true;
+        }
+
+        public void OpenLoginView(object arg)
+        {
+            DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
+            updateCfInstances();
+        }
+
+        private void updateCfInstances()
+        {
+            CfInstances = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+        }
+
     }
 }

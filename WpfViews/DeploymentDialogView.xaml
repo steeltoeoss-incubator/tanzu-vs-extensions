@@ -28,7 +28,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="300">
+    <Grid Height="300" Width="200">
         <Grid.RowDefinitions>
             <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="24"></RowDefinition>
@@ -38,10 +38,11 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="30"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel VerticalAlignment="Center" Grid.Row="0" Margin="8,0,8,0">
+        <StackPanel VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Deployment Target"/>
         </StackPanel>
 
@@ -53,17 +54,23 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <StackPanel Grid.Row="3"  Margin="8,0,8,0">
+        <Button Grid.Row="1" Grid.Column="1" 
+                Style="{DynamicResource RoundedButtonStyle}" 
+                Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+            <Image Source="Resources/AddCloud.png" Stretch="None" 
+                   ToolTip="Target New Cloud Foundry Instance"/>
+        </Button>
+
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <Button Content="Test-upload 'ConsoleApp1'"
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Margin="8,0,8,0" Background="DarkGoldenrod">
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0" Background="DarkGoldenrod">
             <TextBlock Text="{Binding Path=DeploymentStatus}" />
         </StackPanel>
-
 
     </Grid>
 </UserControl>

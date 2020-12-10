@@ -11,6 +11,7 @@ namespace TanzuForVS.WpfViews
     public partial class DeploymentDialogView : UserControl, IDeploymentDialogView
     {
         public ICommand UploadAppCommand { get; }
+        public ICommand OpenLoginDialogCommand { get; }
 
         public DeploymentDialogView()
         {
@@ -20,6 +21,7 @@ namespace TanzuForVS.WpfViews
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel)
         {
             UploadAppCommand = new AsyncDelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
+            OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
 
             DataContext = viewModel;
             InitializeComponent();
