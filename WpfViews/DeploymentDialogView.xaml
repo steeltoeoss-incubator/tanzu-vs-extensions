@@ -34,6 +34,10 @@
             <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -46,7 +50,7 @@
             <TextBlock VerticalAlignment="Center" Text="Select Deployment Target"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="1" Margin="8,0,8,0" ItemsSource="{Binding CfInstances}">
+        <ComboBox Grid.Row="1" Margin="8,0,8,0" ItemsSource="{Binding CfInstances}" SelectedItem="{Binding SelectedCf}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding InstanceName}"/>
@@ -60,15 +64,39 @@
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
+        
+        <StackPanel VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" Margin="8,0,8,0">
+            <TextBlock VerticalAlignment="Center" Text="Select Target Organization"/>
+        </StackPanel>
+        
+        <ComboBox Grid.Row="3" Margin="8,0,8,0" ItemsSource="{Binding CfOrgs}" SelectedItem="{Binding SelectedOrg}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding OrgName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        
+        <StackPanel VerticalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0">
+            <TextBlock VerticalAlignment="Center" Text="Select Target Space"/>
+        </StackPanel>
+        
+        <ComboBox Grid.Row="5" Margin="8,0,8,0" ItemsSource="{Binding CfSpaces}" SelectedItem="{Binding SelectedSpace}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding SpaceName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <Button Content="Test-upload 'ConsoleApp1'"
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0" Background="DarkGoldenrod">
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0" Background="DarkGoldenrod">
             <TextBlock Text="{Binding Path=DeploymentStatus}" />
         </StackPanel>
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace TanzuForVS.Models
+﻿namespace TanzuForVS.Models
 {
     public class CloudFoundryInstance
     {
@@ -13,7 +11,5 @@ namespace TanzuForVS.Models
         public string InstanceName { get; set; }
         public string ApiAddress { get; set; }
         public string AccessToken { get; set; }
-        public ObservableCollection<CloudFoundryOrganization> Orgs { get; set; }
-
     }
 }
