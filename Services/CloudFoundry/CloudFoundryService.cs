@@ -195,7 +195,7 @@ namespace TanzuForVS.Services.CloudFoundry
             }
         }
 
-        public async Task<bool> DeployAppAsync()
+        public async Task<bool> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace)
         {
             //Create an App via POST / v3 / apps(docs)
             //Create a Package via POST / v3 / packages(docs)
