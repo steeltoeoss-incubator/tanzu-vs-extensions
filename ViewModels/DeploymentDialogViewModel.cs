@@ -98,7 +98,7 @@ namespace TanzuForVS.ViewModels
                     selectedSpace = value;
                 }
 
-                RaisePropertyChangedEvent("SelectedOrg");
+                RaisePropertyChangedEvent("SelectedSpace");
             }
         }
 
@@ -145,12 +145,12 @@ namespace TanzuForVS.ViewModels
         {
             try
             {
-                if (CloudFoundryService.ActiveCloud == null)
-                {
-                    throw new Exception("Unclear which CF to target; ActiveCloud == null");
-                }
-                bool appWasDeployed = await CloudFoundryService.DeployAppAsync();
+                var space = arg as CloudFoundrySpace;
+
+                bool appWasDeployed = await CloudFoundryService.DeployAppAsync(space.ParentOrg.ParentCf, space.ParentOrg, space);
+
                 if (appWasDeployed) DeploymentStatus = "App was successfully deployed!";
+
                 DeploymentStatus = "CloudFoundryService.DeployAppAsync returned false.";
             }
             catch (Exception e)

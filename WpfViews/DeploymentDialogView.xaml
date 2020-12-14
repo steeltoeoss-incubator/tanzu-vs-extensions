@@ -64,11 +64,11 @@
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
-        
+
         <StackPanel VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Target Organization"/>
         </StackPanel>
-        
+
         <ComboBox Grid.Row="3" Margin="8,0,8,0" ItemsSource="{Binding CfOrgs}" SelectedItem="{Binding SelectedOrg}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -76,11 +76,11 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        
+
         <StackPanel VerticalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Target Space"/>
         </StackPanel>
-        
+
         <ComboBox Grid.Row="5" Margin="8,0,8,0" ItemsSource="{Binding CfSpaces}" SelectedItem="{Binding SelectedSpace}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -92,12 +92,17 @@
         <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <Button Content="Test-upload 'ConsoleApp1'"
                 Style="{DynamicResource RoundedButtonStyle}"
-                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
+                Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" 
+                CommandParameter="{Binding Path=SelectedSpace}">
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0" Background="DarkGoldenrod">
-            <TextBlock Text="{Binding Path=DeploymentStatus}" />
+        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0">
+            <TextBox Margin="5"  IsReadOnly="True" 
+                 TextWrapping="Wrap" BorderBrush="Transparent" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 Foreground="Crimson" MinLines="3" MaxLines="3" 
+                 Background="Transparent" Text="{Binding  Path=DeploymentStatus}" />
         </StackPanel>
 
     </Grid>
