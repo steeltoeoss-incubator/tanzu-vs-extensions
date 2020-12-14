@@ -15,10 +15,12 @@ namespace TanzuForVS.ViewModels
         private CloudFoundryOrganization selectedOrg;
         private CloudFoundrySpace selectedSpace;
 
+        public string initialStatus = "Deployment hasn't started yet.";
+
         public DeploymentDialogViewModel(IServiceProvider services)
             : base(services)
         {
-            DeploymentStatus = "Deployment hasn't started yet.";
+            DeploymentStatus = initialStatus;
             SelectedCf = null;
             updateCfInstances();
         }
