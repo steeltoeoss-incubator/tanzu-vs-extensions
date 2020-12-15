@@ -26,6 +26,19 @@ namespace TanzuForVS.ViewModels
         }
 
 
+        private string appName;
+
+        public string AppName
+        {
+            get => appName;
+
+            set
+            {
+                appName = value;
+                RaisePropertyChangedEvent("AppName");
+            }
+        }
+
         public string DeploymentStatus
         {
 
@@ -134,11 +147,15 @@ namespace TanzuForVS.ViewModels
         {
             try
             {
+                if (string.IsNullOrEmpty(AppName)) throw new Exception("App name not specified");
                 if (SelectedCf == null) throw new Exception("Target not specified");
                 if (SelectedOrg == null) throw new Exception("Org not specified");
                 if (SelectedSpace == null) throw new Exception("Space not specified");
 
-                bool appWasDeployed = await CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf, SelectedSpace.ParentOrg, SelectedSpace);
+                bool appWasDeployed = await CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf,
+                                                                               SelectedSpace.ParentOrg,
+                                                                               SelectedSpace,
+                                                                               AppName);
 
                 if (appWasDeployed) DeploymentStatus = "App was successfully deployed!";
 

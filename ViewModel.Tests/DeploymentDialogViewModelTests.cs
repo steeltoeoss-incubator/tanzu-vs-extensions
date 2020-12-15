@@ -59,12 +59,25 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public async Task DeployApp_SetsDeploymentStatus_WhenSelectedCfIsNull()
+        public async Task DeployApp_SetsDeploymentStatus_WhenAppNameIsNull()
         {
             Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
+            Assert.IsNull(_sut.AppName);
+
+            await _sut.DeployApp(null);
+            Assert.IsTrue(_sut.DeploymentStatus.Contains("App name not specified"));
+        }
+
+        [TestMethod]
+        public async Task DeployApp_SetsDeploymentStatus_WhenSelectedCfIsNull()
+        {
+            _sut.AppName = "filler";
+
+            Assert.IsNotNull(_sut.AppName);
             Assert.IsNull(_sut.SelectedCf);
             Assert.IsNull(_sut.SelectedOrg);
             Assert.IsNull(_sut.SelectedSpace);
+            Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
 
             await _sut.DeployApp(null);
             Assert.IsTrue(_sut.DeploymentStatus.Contains("Target not specified"));
@@ -73,12 +86,14 @@ namespace TanzuForVS.ViewModelsTests
         [TestMethod]
         public async Task DeployApp_SetsDeploymentStatus_WhenSelectedOrgIsNull()
         {
+            _sut.AppName = "filler";
             _sut.SelectedCf = _fakeCloudFoundryInstances[0];
 
-            Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
+            Assert.IsNotNull(_sut.AppName);
             Assert.IsNotNull(_sut.SelectedCf);
             Assert.IsNull(_sut.SelectedOrg);
             Assert.IsNull(_sut.SelectedSpace);
+            Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
 
             await _sut.DeployApp(null);
             Assert.IsTrue(_sut.DeploymentStatus.Contains("Org not specified"));
@@ -87,13 +102,15 @@ namespace TanzuForVS.ViewModelsTests
         [TestMethod]
         public async Task DeployApp_SetsDeploymentStatus_WhenSelectedSpaceIsNull()
         {
+            _sut.AppName = "filler";
             _sut.SelectedCf = _fakeCloudFoundryInstances[0];
             _sut.SelectedOrg = _fakeCloudFoundryOrganizations[0];
-
-            Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
+            
+            Assert.IsNotNull(_sut.AppName);
             Assert.IsNotNull(_sut.SelectedCf);
             Assert.IsNotNull(_sut.SelectedOrg);
             Assert.IsNull(_sut.SelectedSpace);
+            Assert.AreEqual(_sut.initialStatus, _sut.DeploymentStatus);
 
             await _sut.DeployApp(null);
             Assert.IsTrue(_sut.DeploymentStatus.Contains("Space not specified"));

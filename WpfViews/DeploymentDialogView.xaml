@@ -38,6 +38,8 @@
             <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
+            <RowDefinition Height="24"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -46,11 +48,15 @@
             <ColumnDefinition Width="30"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel VerticalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <TextBlock Grid.Row="0" Text="New App Name:" VerticalAlignment="Center" Margin="8,0,8,0"/>
+
+        <TextBox Grid.Row="1" Grid.ColumnSpan="2" Margin="8,0,8,0" Text="{Binding AppName}" VerticalAlignment="Center"/>
+
+        <StackPanel VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Deployment Target"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="1" Margin="8,0,8,0" 
+        <ComboBox Grid.Row="3" Margin="8,0,8,0" 
                   ItemsSource="{Binding CfInstanceOptions}" 
                   SelectedItem="{Binding SelectedCf}"
                   DropDownClosed="CfInstanceOptions_ComboBox_DropDownClosed">
@@ -61,18 +67,18 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <Button Grid.Row="1" Grid.Column="1" 
+        <Button Grid.Row="3" Grid.Column="1" 
                 Style="{DynamicResource RoundedButtonStyle}" 
                 Command ="{ Binding ElementName=DeploymentDialogViewElement, Path=OpenLoginDialogCommand }" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
             <Image Source="Resources/AddCloud.png" Stretch="None" 
                    ToolTip="Target New Cloud Foundry Instance"/>
         </Button>
 
-        <StackPanel VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <StackPanel VerticalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Target Organization"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="3" Margin="8,0,8,0" 
+        <ComboBox Grid.Row="5" Margin="8,0,8,0" 
                   ItemsSource="{Binding CfOrgOptions}" 
                   SelectedItem="{Binding SelectedOrg}"
                   DropDownClosed="CfOrgOptions_ComboBox_DropDownClosed">
@@ -83,11 +89,11 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <StackPanel VerticalAlignment="Center" Grid.Row="4" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <StackPanel VerticalAlignment="Center" Grid.Row="6" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBlock VerticalAlignment="Center" Text="Select Target Space"/>
         </StackPanel>
 
-        <ComboBox Grid.Row="5" Margin="8,0,8,0" ItemsSource="{Binding CfSpaceOptions}" SelectedItem="{Binding SelectedSpace}">
+        <ComboBox Grid.Row="7" Margin="8,0,8,0" ItemsSource="{Binding CfSpaceOptions}" SelectedItem="{Binding SelectedSpace}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SpaceName}"/>
@@ -95,14 +101,14 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <StackPanel Grid.Row="9" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <Button Content="Test-upload 'ConsoleApp1'"
                 Style="{DynamicResource RoundedButtonStyle}"
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
             </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="8" Grid.ColumnSpan="2" Margin="8,0,8,0">
+        <StackPanel Grid.Row="10" Grid.ColumnSpan="2" Margin="8,0,8,0">
             <TextBox Margin="5"  IsReadOnly="True" 
                  TextWrapping="Wrap" BorderBrush="Transparent" 
                  ScrollViewer.VerticalScrollBarVisibility="Auto"

@@ -195,22 +195,36 @@ namespace TanzuForVS.Services.CloudFoundry
             }
         }
 
-        public async Task<bool> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace)
+        public async Task<bool> DeployAppAsync(CloudFoundryInstance targetCf, CloudFoundryOrganization targetOrg, CloudFoundrySpace targetSpace, string appName)
         {
-            //Create an App via POST / v3 / apps(docs)
-            //Create a Package via POST / v3 / packages(docs)
-            //Must include the app guid in the body of this request(relationships.app.data.guid)
-            //Create a temporary.zip file on the user's OS containing app binaries
-            //I'm unclear on exactly which files need to be in this .zip for .NET apps to be pushed to CF...
-            //Upload app bits via POST / v3 / packages /:guid / upload(docs)
-            //Must include the package guid in the query for this request
-            //Delete temporary.zip file
-            //Create a Build via POST / v3 / builds(docs)
-            //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
-            //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
+            try
+            {
+                var apiAddr = targetCf.ApiAddress;
+                var token = targetCf.AccessToken;
 
-            var newApp = await _cfApiClient.CreateApp(ActiveCloud.ApiAddress, ActiveCloud.AccessToken);
-            return false;
+                //Create an App via POST / v3 / apps(docs)
+                var newApp = await _cfApiClient.CreateApp(apiAddr, token, appName, targetSpace.SpaceId);
+                var appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddr, token, newApp.guid);
+
+                //Create a Package via POST / v3 / packages(docs)
+                //Must include the app guid in the body of this request(relationships.app.data.guid)
+                //Create a temporary.zip file on the user's OS containing app binaries
+                //I'm unclear on exactly which files need to be in this .zip for .NET apps to be pushed to CF...
+                //Upload app bits via POST / v3 / packages /:guid / upload(docs)
+                //Must include the package guid in the query for this request
+                //Delete temporary.zip file
+                //Create a Build via POST / v3 / builds(docs)
+                //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
+                //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                var ex = e;
+                return false;
+            }
+
         }
 
     }

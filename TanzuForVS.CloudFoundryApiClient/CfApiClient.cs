@@ -390,7 +390,7 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<App> CreateApp(string cfTarget, string accessToken)
+        public async Task<App> CreateApp(string cfTarget, string accessToken, string appName, string spaceGuid)
         {
             try
             {
@@ -406,7 +406,26 @@ namespace TanzuForVS.CloudFoundryApiClient
                     Path = createAppPath
                 };
 
-                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString());
+                string json = JsonConvert.SerializeObject(new
+                {
+                    name = appName,
+                    relationships = new
+                    {
+                        space = new
+                        {
+                            data = new
+                            {
+                                guid = spaceGuid
+                            }
+                        }
+                    }
+                });
+
+                var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                };
+
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
 
                 var response = await _httpClient.SendAsync(request);
