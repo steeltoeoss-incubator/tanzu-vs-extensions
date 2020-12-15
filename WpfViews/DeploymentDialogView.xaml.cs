@@ -29,14 +29,14 @@ namespace TanzuForVS.WpfViews
             InitializeComponent();
         }
 
-        private void CfInstances_ComboBox_DropDownClosed(object sender, System.EventArgs e)
+        private void CfInstanceOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-            _viewModel.UpdateCfOrgs();
+            _viewModel.UpdateCfOrgOptions();
         }
 
-        private void CfOrgs_ComboBox_DropDownClosed(object sender, System.EventArgs e)
+        private void CfOrgOptions_ComboBox_DropDownClosed(object sender, System.EventArgs e)
         {
-            _viewModel.UpdateCfSpaces();
+            _viewModel.UpdateCfSpaceOptions();
         }
     }
 }

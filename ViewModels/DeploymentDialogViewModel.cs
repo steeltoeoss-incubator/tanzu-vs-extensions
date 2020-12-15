@@ -22,7 +22,7 @@ namespace TanzuForVS.ViewModels
         {
             DeploymentStatus = initialStatus;
             SelectedCf = null;
-            UpdateCfInstances(); // Test that ctor gets Cfs from CfService
+            UpdateCfInstanceOptions(); // Test that ctor gets Cfs from CfService
         }
 
 
@@ -49,8 +49,8 @@ namespace TanzuForVS.ViewModels
                     selectedCf = value;
 
                     // clear orgs & spaces
-                    CfOrgs = new List<CloudFoundryOrganization>();
-                    CfSpaces = new List<CloudFoundrySpace>();
+                    CfOrgOptions = new List<CloudFoundryOrganization>();
+                    CfSpaceOptions = new List<CloudFoundrySpace>();
 
                     RaisePropertyChangedEvent("SelectedCf");
                 }
@@ -68,7 +68,7 @@ namespace TanzuForVS.ViewModels
                     selectedOrg = value;
 
                     // clear spaces
-                    CfSpaces = new List<CloudFoundrySpace>();
+                    CfSpaceOptions = new List<CloudFoundrySpace>();
                 }
 
                 RaisePropertyChangedEvent("SelectedOrg");
@@ -90,36 +90,36 @@ namespace TanzuForVS.ViewModels
             }
         }
 
-        public List<CloudFoundryInstance> CfInstances
+        public List<CloudFoundryInstance> CfInstanceOptions
         {
             get => cfInstances;
 
             set
             {
                 cfInstances = value;
-                this.RaisePropertyChangedEvent("CfInstances");
+                this.RaisePropertyChangedEvent("CfInstanceOptions");
             }
         }
 
-        public List<CloudFoundryOrganization> CfOrgs
+        public List<CloudFoundryOrganization> CfOrgOptions
         {
             get => cfOrgs;
 
             set
             {
                 cfOrgs = value;
-                this.RaisePropertyChangedEvent("CfOrgs");
+                this.RaisePropertyChangedEvent("CfOrgOptions");
             }
         }
 
-        public List<CloudFoundrySpace> CfSpaces
+        public List<CloudFoundrySpace> CfSpaceOptions
         {
             get => cfSpaces;
 
             set
             {
                 cfSpaces = value;
-                this.RaisePropertyChangedEvent("CfSpaces");
+                this.RaisePropertyChangedEvent("CfSpaceOptions");
             }
         }
 
@@ -160,34 +160,34 @@ namespace TanzuForVS.ViewModels
         public void OpenLoginView(object arg)
         {
             DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
-            UpdateCfInstances();
+            UpdateCfInstanceOptions();
         }
 
 
-        public void UpdateCfInstances()
+        public void UpdateCfInstanceOptions()
         {
-            CfInstances = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
+            CfInstanceOptions = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
         }
 
-        public async Task UpdateCfOrgs()
+        public async Task UpdateCfOrgOptions()
         {
-            if (SelectedCf == null) CfOrgs = new List<CloudFoundryOrganization>();
+            if (SelectedCf == null) CfOrgOptions = new List<CloudFoundryOrganization>();
 
             else
             {
                 var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
-                CfOrgs = orgs;
+                CfOrgOptions = orgs;
             }
         }
 
-        public async Task UpdateCfSpaces()
+        public async Task UpdateCfSpaceOptions()
         {
-            if (SelectedOrg == null) CfSpaces = new List<CloudFoundrySpace>();
+            if (SelectedOrg == null) CfSpaceOptions = new List<CloudFoundrySpace>();
 
             else
             {
                 var spaces = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
-                CfSpaces = spaces;
+                CfSpaceOptions = spaces;
             }
         }
 

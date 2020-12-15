@@ -51,7 +51,7 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public void OpenLoginView_UpdatesCfInstancesFromCloudFoundryService()
+        public void OpenLoginView_UpdatesCfInstanceOptionsFromCloudFoundryService()
         {
             mockCloudFoundryService.Verify(mock => mock.CloudFoundryInstances, Times.Never);
             _sut.OpenLoginView(null);
@@ -100,32 +100,32 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public void SetSelectedCf_ClearsCfOrgsAndCfSpaces()
+        public void SetSelectedCf_ClearsCfOrgOptionsAndCfSpaceOptions()
         {
-            _sut.CfOrgs = new List<CloudFoundryOrganization>
+            _sut.CfOrgOptions = new List<CloudFoundryOrganization>
             {
                 _fakeCloudFoundryOrganizations[0],
                 _fakeCloudFoundryOrganizations[1]
             };
 
-            _sut.CfSpaces = new List<CloudFoundrySpace>
+            _sut.CfSpaceOptions = new List<CloudFoundrySpace>
             {
                 _fakeCloudFoundrySpaces[0],
                 _fakeCloudFoundrySpaces[1]
             };
 
             Assert.IsNull(_sut.SelectedCf);
-            Assert.AreEqual(2, _sut.CfOrgs.Count);
-            Assert.AreEqual(2, _sut.CfSpaces.Count);
+            Assert.AreEqual(2, _sut.CfOrgOptions.Count);
+            Assert.AreEqual(2, _sut.CfSpaceOptions.Count);
             eventsRaised = new List<string>(); // Ignore initial events
 
             _sut.SelectedCf = _fakeCloudFoundryInstances[1];
 
-            Assert.AreEqual(0, _sut.CfOrgs.Count);
-            Assert.AreEqual(0, _sut.CfSpaces.Count);
+            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
             Assert.AreEqual(3, eventsRaised.Count);
-            Assert.AreEqual(eventsRaised[0], "CfOrgs");
-            Assert.AreEqual(eventsRaised[1], "CfSpaces");
+            Assert.AreEqual(eventsRaised[0], "CfOrgOptions");
+            Assert.AreEqual(eventsRaised[1], "CfSpaceOptions");
             Assert.AreEqual(eventsRaised[2], "SelectedCf");
         }
 
@@ -159,23 +159,23 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public void SetSelectedOrg_ClearsCfSpaces()
+        public void SetSelectedOrg_ClearsCfSpaceOptions()
         {
-            _sut.CfSpaces = new List<CloudFoundrySpace>
+            _sut.CfSpaceOptions = new List<CloudFoundrySpace>
             {
                 _fakeCloudFoundrySpaces[0],
                 _fakeCloudFoundrySpaces[1]
             };
 
             Assert.IsNull(_sut.SelectedOrg);
-            Assert.AreEqual(2, _sut.CfSpaces.Count);
+            Assert.AreEqual(2, _sut.CfSpaceOptions.Count);
             eventsRaised = new List<string>(); // Ignore initial events
 
             _sut.SelectedOrg = _fakeCloudFoundryOrganizations[1];
 
-            Assert.AreEqual(0, _sut.CfSpaces.Count);
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
             Assert.AreEqual(2, eventsRaised.Count);
-            Assert.AreEqual(eventsRaised[0], "CfSpaces");
+            Assert.AreEqual(eventsRaised[0], "CfSpaceOptions");
             Assert.AreEqual(eventsRaised[1], "SelectedOrg");
         }
 
@@ -194,30 +194,30 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public void UpdateCfInstances_GetsCfsFromCloudFoundryService()
+        public void UpdateCfInstanceOptions_GetsCfsFromCloudFoundryService()
         {
-            _sut.UpdateCfInstances();
+            _sut.UpdateCfInstanceOptions();
             mockCloudFoundryService.Verify(mock => mock.CloudFoundryInstances, Times.Once);
         }
 
         [TestMethod]
-        public async Task UpdateCfOrgs_GetsOrgsForCurrentSelectedCf()
+        public async Task UpdateCfOrgOptions_GetsOrgsForCurrentSelectedCf()
         {
             _sut.SelectedCf = _fakeCloudFoundryInstances[0];
             mockCloudFoundryService.Verify(mock => mock.GetOrgsForCfInstanceAsync(It.IsAny<CloudFoundryInstance>()), Times.Never);
 
-            await _sut.UpdateCfOrgs();
+            await _sut.UpdateCfOrgOptions();
             mockCloudFoundryService.Verify(mock => mock.GetOrgsForCfInstanceAsync(_fakeCloudFoundryInstances[0]), Times.Once);
         }
 
         [TestMethod]
-        public async Task UpdateCfOrgs_EmptiesCfOrgs_WhenSelectedCfIsNull()
+        public async Task UpdateCfOrgOptions_EmptiesCfOrgOptions_WhenSelectedCfIsNull()
         {
             Exception thrownException = null;
             try
             {
                 Assert.IsNull(_sut.SelectedCf);
-                await _sut.UpdateCfOrgs();
+                await _sut.UpdateCfOrgOptions();
             }
             catch (Exception e)
             {
@@ -225,27 +225,27 @@ namespace TanzuForVS.ViewModelsTests
             }
 
             Assert.IsNull(thrownException);
-            Assert.AreEqual(0, _sut.CfOrgs.Count);
+            Assert.AreEqual(0, _sut.CfOrgOptions.Count);
         }
 
         [TestMethod]
-        public async Task UpdateCfSpaces_GetsSpacesForCurrentSelectedOrg()
+        public async Task UpdateCfSpaceOptions_GetsSpacesForCurrentSelectedOrg()
         {
             _sut.SelectedOrg = _fakeCloudFoundryOrganizations[0];
             mockCloudFoundryService.Verify(mock => mock.GetSpacesForOrgAsync(It.IsAny<CloudFoundryOrganization>()), Times.Never);
 
-            await _sut.UpdateCfSpaces();
+            await _sut.UpdateCfSpaceOptions();
             mockCloudFoundryService.Verify(mock => mock.GetSpacesForOrgAsync(_fakeCloudFoundryOrganizations[0]), Times.Once);
         }
 
         [TestMethod]
-        public async Task UpdateCfSpaces_EmptiesCfSpaces_WhenSelectedOrgIsNull()
+        public async Task UpdateCfSpaceOptions_EmptiesCfSpaceOptions_WhenSelectedOrgIsNull()
         {
             Exception thrownException = null;
             try
             {
                 Assert.IsNull(_sut.SelectedOrg);
-                await _sut.UpdateCfSpaces();
+                await _sut.UpdateCfSpaceOptions();
             }
             catch (Exception e)
             {
@@ -253,7 +253,7 @@ namespace TanzuForVS.ViewModelsTests
             }
 
             Assert.IsNull(thrownException);
-            Assert.AreEqual(0, _sut.CfSpaces.Count);
+            Assert.AreEqual(0, _sut.CfSpaceOptions.Count);
         }
         
     }
