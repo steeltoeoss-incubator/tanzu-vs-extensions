@@ -8,5 +8,8 @@ namespace TanzuForVS.ViewModels
         bool CanOpenLoginView(object arg);
         Task DeployApp(object arg);
         void OpenLoginView(object arg);
+        void UpdateCfInstances();
+        Task UpdateCfOrgs();
+        Task UpdateCfSpaces();
     }
 }

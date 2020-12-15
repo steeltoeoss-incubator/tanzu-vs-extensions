@@ -209,14 +209,6 @@ namespace TanzuForVS.Services.CloudFoundry
             //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
             //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
 
-
-            // TODO: test that if ActiveCloud is not set, return false
-            if (ActiveCloud == null)
-            {
-                System.Diagnostics.Debug.WriteLine("ActiveCloud not set");
-                return false;
-            }
-
             var newApp = await _cfApiClient.CreateApp(ActiveCloud.ApiAddress, ActiveCloud.AccessToken);
             return false;
         }

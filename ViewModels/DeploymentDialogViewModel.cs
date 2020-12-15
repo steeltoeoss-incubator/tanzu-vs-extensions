@@ -22,7 +22,7 @@ namespace TanzuForVS.ViewModels
         {
             DeploymentStatus = initialStatus;
             SelectedCf = null;
-            updateCfInstances();
+            UpdateCfInstances(); // Test that ctor gets Cfs from CfService
         }
 
 
@@ -44,20 +44,13 @@ namespace TanzuForVS.ViewModels
 
             set
             {
-                if (value != selectedCf) // TODO: test that nothing happens (i.e. no network calls) if we try to re-assign the same value to this variable
+                if (value != selectedCf)
                 {
                     selectedCf = value;
 
-                    if (value != null)
-                    {
-                        CfOrgs = new List<CloudFoundryOrganization>(); // TODO: test that org list is cleared while new orgs are loading
-                        updateCfOrgs(value); // TODO: test that orgs are updated eventually (likely *after* this method completes)
-                    }
-                    else if (CfOrgs.Count > 0)
-                    {
-                        CfOrgs = new List<CloudFoundryOrganization>(); // TODO: test that CfOrgs is replaced with an empty list if selectedCf becomes null
-                        CfSpaces = new List<CloudFoundrySpace>(); // TODO: test that CfSpaces is replaced with an empty list if selectedCf becomes null
-                    }
+                    // clear orgs & spaces
+                    CfOrgs = new List<CloudFoundryOrganization>();
+                    CfSpaces = new List<CloudFoundrySpace>();
 
                     RaisePropertyChangedEvent("SelectedCf");
                 }
@@ -74,15 +67,8 @@ namespace TanzuForVS.ViewModels
                 {
                     selectedOrg = value;
 
-                    if (value != null)
-                    {
-                        CfSpaces = new List<CloudFoundrySpace>(); // TODO: test that spaces list is cleared while new spaces are loading
-                        updateCfSpaces(value); // TODO: test that spaces are updated eventually (likely *after* this method completes)
-                    }
-                    else if (CfSpaces.Count > 0)
-                    {
-                        CfSpaces = new List<CloudFoundrySpace>(); // TODO: test that CfSpaces is replaced with an empty list if selectedOrg becomes null
-                    }
+                    // clear spaces
+                    CfSpaces = new List<CloudFoundrySpace>();
                 }
 
                 RaisePropertyChangedEvent("SelectedOrg");
@@ -140,6 +126,7 @@ namespace TanzuForVS.ViewModels
 
         public bool CanDeployApp(object arg)
         {
+
             return true;
         }
 
@@ -147,10 +134,11 @@ namespace TanzuForVS.ViewModels
         {
             try
             {
-                var space = arg as CloudFoundrySpace;
+                if (SelectedCf == null) throw new Exception("Target not specified");
+                if (SelectedOrg == null) throw new Exception("Org not specified");
+                if (SelectedSpace == null) throw new Exception("Space not specified");
 
-                //TODO: when space is null, set deployment status 
-                bool appWasDeployed = await CloudFoundryService.DeployAppAsync(space.ParentOrg.ParentCf, space.ParentOrg, space);
+                bool appWasDeployed = await CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf, SelectedSpace.ParentOrg, SelectedSpace);
 
                 if (appWasDeployed) DeploymentStatus = "App was successfully deployed!";
 
@@ -172,25 +160,35 @@ namespace TanzuForVS.ViewModels
         public void OpenLoginView(object arg)
         {
             DialogService.ShowDialog(typeof(AddCloudDialogViewModel).Name);
-            updateCfInstances();
+            UpdateCfInstances();
         }
 
 
-        private void updateCfInstances()
+        public void UpdateCfInstances()
         {
             CfInstances = new List<CloudFoundryInstance>(CloudFoundryService.CloudFoundryInstances.Values);
         }
 
-        private async Task updateCfOrgs(CloudFoundryInstance cf)
+        public async Task UpdateCfOrgs()
         {
-            var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(cf);
-            CfOrgs = orgs;
+            if (SelectedCf == null) CfOrgs = new List<CloudFoundryOrganization>();
+
+            else
+            {
+                var orgs = await CloudFoundryService.GetOrgsForCfInstanceAsync(SelectedCf);
+                CfOrgs = orgs;
+            }
         }
 
-        private async Task updateCfSpaces(CloudFoundryOrganization org)
+        public async Task UpdateCfSpaces()
         {
-            var spaces = await CloudFoundryService.GetSpacesForOrgAsync(org);
-            CfSpaces = spaces;
+            if (SelectedOrg == null) CfSpaces = new List<CloudFoundrySpace>();
+
+            else
+            {
+                var spaces = await CloudFoundryService.GetSpacesForOrgAsync(SelectedOrg);
+                CfSpaces = spaces;
+            }
         }
 
     }

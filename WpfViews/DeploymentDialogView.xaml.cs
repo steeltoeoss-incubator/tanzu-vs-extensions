@@ -10,6 +10,7 @@ namespace TanzuForVS.WpfViews
     /// </summary>
     public partial class DeploymentDialogView : UserControl, IDeploymentDialogView
     {
+        private IDeploymentDialogViewModel _viewModel;
         public ICommand UploadAppCommand { get; }
         public ICommand OpenLoginDialogCommand { get; }
 
@@ -20,6 +21,7 @@ namespace TanzuForVS.WpfViews
 
         public DeploymentDialogView(IDeploymentDialogViewModel viewModel)
         {
+            _viewModel = viewModel;
             UploadAppCommand = new AsyncDelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
 
@@ -27,5 +29,14 @@ namespace TanzuForVS.WpfViews
             InitializeComponent();
         }
 
+        private void CfInstances_ComboBox_DropDownClosed(object sender, System.EventArgs e)
+        {
+            _viewModel.UpdateCfOrgs();
+        }
+
+        private void CfOrgs_ComboBox_DropDownClosed(object sender, System.EventArgs e)
+        {
+            _viewModel.UpdateCfSpaces();
+        }
     }
 }
