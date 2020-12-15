@@ -149,6 +149,7 @@ namespace TanzuForVS.ViewModels
             {
                 var space = arg as CloudFoundrySpace;
 
+                //TODO: when space is null, set deployment status 
                 bool appWasDeployed = await CloudFoundryService.DeployAppAsync(space.ParentOrg.ParentCf, space.ParentOrg, space);
 
                 if (appWasDeployed) DeploymentStatus = "App was successfully deployed!";

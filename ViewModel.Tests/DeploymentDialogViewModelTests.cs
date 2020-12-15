@@ -60,8 +60,10 @@ namespace TanzuForVS.ViewModelsTests
         }
 
         [TestMethod]
-        public void SetSelectedCf_ClearsCfOrgs_WhenSelectedCfIsNull()
+        public void SetSelectedCf_ClearsCfOrgs_WhenSelectedCfIsNotNull()
         {
+            var x = _fakeCloudFoundryInstances[0];
+
             DeploymentDialogViewModel _sut = new DeploymentDialogViewModel(services)
             {
                 SelectedCf = _fakeCloudFoundryInstances[0],
@@ -72,8 +74,10 @@ namespace TanzuForVS.ViewModelsTests
                 }
             };
 
+            Assert.AreEqual(2, _sut.CfOrgs.Count);
             _sut.SelectedCf = _fakeCloudFoundryInstances[1];
 
+            Assert.AreEqual(0, _sut.CfOrgs.Count);
             Assert.AreEqual(1, eventsRaised.Count);
             // TODO: finish this test
         }
