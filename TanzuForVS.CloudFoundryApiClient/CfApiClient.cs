@@ -389,6 +389,8 @@ namespace TanzuForVS.CloudFoundryApiClient
         /// </summary>
         /// <param name="cfTarget"></param>
         /// <param name="accessToken"></param>
+        /// <param name="appName"></param>
+        /// <param name="spaceGuid"></param>
         /// <returns></returns>
         public async Task<App> CreateApp(string cfTarget, string accessToken, string appName, string spaceGuid)
         {
@@ -423,10 +425,11 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
 
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
+                request.Headers.Add("Accept", "application/json");
 
                 var response = await _httpClient.SendAsync(request);
                 if (response.StatusCode != HttpStatusCode.Created) throw new Exception($"Response from POST `{createAppPath}` was {response.StatusCode}");
@@ -481,7 +484,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -647,7 +650,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -701,7 +704,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(new HttpMethod("PATCH"), uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -803,7 +806,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
@@ -900,7 +903,7 @@ namespace TanzuForVS.CloudFoundryApiClient
 
                 var request = new HttpRequestMessage(HttpMethod.Post, uri.ToString())
                 {
-                    Content = new StringContent(json, Encoding.UTF8, "applicaiton/json")
+                    Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
                 request.Headers.Add("Accept", "application/json");
                 request.Headers.Add("Authorization", "Bearer " + accessToken);
