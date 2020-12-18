@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
 using TanzuForVS.CloudFoundryApiClient.Models.AppsResponse;
 using TanzuForVS.CloudFoundryApiClient.Models.OrgsResponse;
+using TanzuForVS.CloudFoundryApiClient.Models.Package;
 using TanzuForVS.CloudFoundryApiClient.Models.SpacesResponse;
 using TanzuForVS.Models;
 
@@ -202,35 +203,62 @@ namespace TanzuForVS.Services.CloudFoundry
 
             var apiAddr = targetCf.ApiAddress;
             var token = targetCf.AccessToken;
+            App newApp = null;
+            Package newPackage = null;
 
-            //Create an App via POST / v3 / apps(docs)
-            var newApp = await _cfApiClient.CreateApp(apiAddr, token, appName, targetSpace.SpaceId);
-            if (newApp == null)
+            try
             {
-                throw new Exception($"CreateApp failed: _cfApiClient.CreateApp({apiAddr}, {(string.IsNullOrEmpty(token) ? "token was empty/null" : "token seems ok")}, {appName}, {targetSpace.SpaceId})");
+
+                //Create an App via POST / v3 / apps(docs)
+                newApp = await _cfApiClient.CreateApp(apiAddr, token, appName, targetSpace.SpaceId);
+                if (newApp == null) throw new Exception($"CreateApp failed: _cfApiClient.CreateApp({apiAddr}, {(string.IsNullOrEmpty(token) ? "token was empty/null" : "token seems ok")}, {appName}, {targetSpace.SpaceId})");
+
+                //Create a Package via POST / v3 / packages(docs)
+                //Must include the app guid in the body of this request(relationships.app.data.guid)
+                newPackage = await _cfApiClient.CreatePackage(apiAddr, token, newApp.guid);
+                if (newPackage == null) throw new Exception($"CreatePackage failed: _cfApiClient.CreatePackage({apiAddr})");
+
+                //Create a temporary.zip file on the user's OS containing app binaries
+                // TODO: un-harcode this (we're currently assuming that "bits-to-upload.zip" exists at: 
+                // "C:\Users\awoosnam\source\repos\ConsoleApp1\ConsoleApp1")
+                var filePath = @"C:\Users\awoosnam\source\repos\ConsoleApp1\ConsoleApp1";
+
+                //Upload app bits via POST / v3 / packages /:guid / upload(docs)
+                //Must include the package guid in the query for this request
+                byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+                var bitsWereUploaded = await _cfApiClient.UploadBits(apiAddr, token, newPackage.guid, "bits-to-upload", fileBytes);
+
+                if (!bitsWereUploaded) throw new Exception("Couldn't upload zipped bits :(");
+
+                //Delete temporary.zip file
+
+                //Create a Build via POST / v3 / builds(docs)
+
+                //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
+
+                //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
+
+                throw new Exception("Made it to the end of the depploy method so far!!!");
+
+                return true;
             }
-            
-            var appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddr, token, newApp.guid);
-            if (!appWasDeleted)
+            catch (Exception e)
             {
-                throw new Exception($"Unable to delete app with guid: {newApp.guid}");
+                var pckgWasDeleted = await _cfApiClient.DeletePackage(apiAddr, token, newPackage.guid);
+                if (!pckgWasDeleted) throw new Exception($"Unable to delete package with guid: {newPackage.guid}");
+
+                var appWasDeleted = await _cfApiClient.DeleteAppWithGuid(apiAddr, token, newApp.guid);
+                if (!appWasDeleted) throw new Exception($"Unable to delete app with guid: {newApp.guid}");
+
+                throw e;
             }
-
-
-            //Create a Package via POST / v3 / packages(docs)
-            //Must include the app guid in the body of this request(relationships.app.data.guid)
-            //Create a temporary.zip file on the user's OS containing app binaries
-            //I'm unclear on exactly which files need to be in this .zip for .NET apps to be pushed to CF...
-            //Upload app bits via POST / v3 / packages /:guid / upload(docs)
-            //Must include the package guid in the query for this request
-            //Delete temporary.zip file
-            //Create a Build via POST / v3 / builds(docs)
-            //Assign the app to the resultant Droplet from the Build created above via PATCH / v3 / apps /:guid / relationships / current_droplet(docs)
-            //Start the app(if it isn't started by default) via POST /v3/apps/:guid/actions/start
-
-            return true;
 
         }
+
+        // TODO: figure our how to zip project bin files 
+        // does this Services project have access to the `package` var? What about DTE?
+        // if not, can this file execute the "PushToCLoudFOundryCOmmand" even though it lives in a different project?
+
 
     }
 }
