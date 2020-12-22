@@ -120,8 +120,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Services\Services.csproj">
-      <Project>{743bfc55-6c1f-4d0d-8d7e-c66a2c8ed917}</Project>
+    <ProjectReference Include="..\Services\Services.csproj" AdditionalProperties="TargetFramework=net472">
+      <Project>{bcd3dd2e-6220-47a4-9c9d-9f71c2c715c0}</Project>
       <Name>Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\ViewModels\ViewModels.csproj">

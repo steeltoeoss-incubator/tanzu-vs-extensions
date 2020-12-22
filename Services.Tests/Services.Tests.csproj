@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" AdditionalProperties="TargetFramework=netstandard2.1"/>
   </ItemGroup>
 
 </Project>
