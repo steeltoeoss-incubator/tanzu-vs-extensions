@@ -4,10 +4,13 @@ using Microsoft;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.IO.Compression;
 using Task = System.Threading.Tasks.Task;
+using TanzuForVS.Services.CloudFoundry;
+using TanzuForVS.Services;
 
 namespace TanzuForVS.Commands
 {
@@ -130,7 +133,33 @@ namespace TanzuForVS.Commands
 
                 // TODO: overwrite zip file if it already exists 
                 // (although, it shouldn't already exist if we clean up this zip folder properly after pushing bits)
-                ZipFile.CreateFromDirectory(pathToBinDirectory, Path.Combine(projectDirectory, "cf-bits-to-upload.zip"));
+                //ZipFile.CreateFromDirectory(pathToBinDirectory, Path.Combine(projectDirectory, "bits-to-upload.zip"));
+
+                // TODO: be careful creating TextEntry objects; make sure to properly set the `Text` props
+
+                var directoryFiles = Directory.GetFiles(pathToBinDirectory);
+
+                var fileEntries = new List<FileEntry>();
+
+                foreach (var file in directoryFiles) {
+
+                    fileEntries.Add(new FileEntry
+                    {
+                        Path = file,
+                        //TODO: if the file is a dir and not a real file, make sure the text property get sets to null
+                        Text = File.ReadAllText(file),
+                    });
+                    
+                }
+
+
+                ZipArchiver zipFiles = new ZipArchiver();
+                var fileBytes = zipFiles.ToBytes(fileEntries);
+
+                //TODO: the complicated process of having this communicate with the API stuff; 
+                //'deployment-dialog-window' branch has an active attempt to do this already
+                return fileBytes;
+
             }
 
         }

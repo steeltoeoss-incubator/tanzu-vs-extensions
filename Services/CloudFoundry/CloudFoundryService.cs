@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Security;
 using System.Threading.Tasks;
 using TanzuForVS.CloudFoundryApiClient;
@@ -208,7 +209,6 @@ namespace TanzuForVS.Services.CloudFoundry
 
             try
             {
-
                 //Create an App via POST / v3 / apps(docs)
                 newApp = await _cfApiClient.CreateApp(apiAddr, token, appName, targetSpace.SpaceId);
                 if (newApp == null) throw new Exception($"CreateApp failed: _cfApiClient.CreateApp({apiAddr}, {(string.IsNullOrEmpty(token) ? "token was empty/null" : "token seems ok")}, {appName}, {targetSpace.SpaceId})");
@@ -221,12 +221,12 @@ namespace TanzuForVS.Services.CloudFoundry
                 //Create a temporary.zip file on the user's OS containing app binaries
                 // TODO: un-harcode this (we're currently assuming that "bits-to-upload.zip" exists at: 
                 // "C:\Users\awoosnam\source\repos\ConsoleApp1\ConsoleApp1")
-                var filePath = @"C:\Users\awoosnam\source\repos\ConsoleApp1\ConsoleApp1";
+                var filePath = @"C:\Users\awoosnam\source\repos\ConsoleApp1\ConsoleApp1\bits-to-upload.zip";
 
                 //Upload app bits via POST / v3 / packages /:guid / upload(docs)
                 //Must include the package guid in the query for this request
                 byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-                var bitsWereUploaded = await _cfApiClient.UploadBits(apiAddr, token, newPackage.guid, "bits-to-upload", fileBytes);
+                var bitsWereUploaded = await _cfApiClient.UploadBits(apiAddr, token, newPackage.guid, "bits-to-upload.zip", fileBytes);
 
                 if (!bitsWereUploaded) throw new Exception("Couldn't upload zipped bits :(");
 
