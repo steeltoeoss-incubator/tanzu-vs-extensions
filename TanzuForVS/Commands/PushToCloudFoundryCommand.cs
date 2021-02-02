@@ -102,10 +102,13 @@ namespace TanzuForVS.Commands
         {
             try
             {
-                foreach (string projectPath in await GetSelectedProjectPathsAsync())
+                var dte = (DTE2)await package.GetServiceAsync(typeof(DTE));
+                Assumes.Present(dte);
+
+                foreach (string projectPath in await GetSelectedProjectPathsAsync(dte))
                 {
                     var viewModel = new DeploymentDialogViewModel(_services, projectPath);
-                    var view = new DeploymentDialogView(viewModel);
+                    var view = new DeploymentDialogView(viewModel, dte);
 
                     var deployWindow = new DeploymentWindow
                     {
@@ -132,13 +135,10 @@ namespace TanzuForVS.Commands
             }
         }
 
-        private async Task<List<string>> GetSelectedProjectPathsAsync()
+        private async Task<List<string>> GetSelectedProjectPathsAsync(DTE2 dte)
         {
             // Ensure project file access happens on the main thread
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var dte = (DTE2)await package.GetServiceAsync(typeof(DTE));
-            Assumes.Present(dte);
 
             var projectPaths = new List<string>();
             var activeProjects = (Array)dte.ActiveSolutionProjects;

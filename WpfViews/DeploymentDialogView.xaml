@@ -34,7 +34,7 @@
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
             <RowDefinition Height="32"></RowDefinition>
-            <RowDefinition Height="32"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -101,6 +101,10 @@
             <Button Content="Deploy" Width="100" HorizontalAlignment="Right" 
                 Command="{ Binding ElementName=DeploymentDialogViewElement, Path=UploadAppCommand }" >
             </Button>
+            <Button Content="Show Output In Output Window"
+                    Margin="0,10"
+                    Click="ShowOutputInOutputWindow"
+                    />
         </StackPanel>
 
         <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Margin="8,0,8,0">
