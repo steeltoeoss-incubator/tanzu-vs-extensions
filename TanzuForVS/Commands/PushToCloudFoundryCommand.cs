@@ -110,6 +110,8 @@ namespace TanzuForVS.Commands
                     var viewModel = new DeploymentDialogViewModel(_services, projectPath);
                     var view = new DeploymentDialogView(viewModel, dte);
 
+                    
+
                     var deployWindow = new DeploymentWindow
                     {
                         Content = view

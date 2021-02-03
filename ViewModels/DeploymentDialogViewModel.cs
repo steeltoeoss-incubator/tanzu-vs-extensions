@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TanzuForVS.Models;
-using TanzuForVS.Services;
 
 [assembly: InternalsVisibleTo("TanzuForVS.ViewModel.Tests")]
 
@@ -152,28 +151,23 @@ namespace TanzuForVS.ViewModels
             return true;
         }
 
-        public async Task DeployApp(object arg)
+        public void DeployApp(object arg)
         {
             try
             {
-                DeploymentStatus = initialStatus;
-
                 if (string.IsNullOrEmpty(AppName)) throw new Exception(appNameEmptyMsg);
                 if (SelectedCf == null) throw new Exception(targetEmptyMsg);
                 if (SelectedOrg == null) throw new Exception(orgEmptyMsg);
                 if (SelectedSpace == null) throw new Exception(spaceEmptyMsg);
 
-                DeploymentStatus = "Waiting for app to deploy....";
-
-                DetailedResult appDeployment = await CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf,
+                CloudFoundryService.DeployAppAsync(SelectedSpace.ParentOrg.ParentCf,
                                                                                SelectedSpace.ParentOrg,
                                                                                SelectedSpace,
                                                                                AppName,
                                                                                projDir,
                                                                                UpdateDeploymentStatus);
 
-                if (appDeployment.Succeeded) DeploymentStatus += $"\n{deploymentSuccessMsg}";
-                else DeploymentStatus += '\n' + appDeployment.Explanation;
+                DialogService.CloseDialog(arg, true);
             }
             catch (Exception e)
             {

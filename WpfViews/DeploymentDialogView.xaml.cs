@@ -28,7 +28,7 @@ namespace TanzuForVS.WpfViews
         {
             _viewModel = viewModel;
             _dte = dte;
-            UploadAppCommand = new AsyncDelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
+            UploadAppCommand = new DelegatingCommand(viewModel.DeployApp, viewModel.CanDeployApp);
             OpenLoginDialogCommand = new DelegatingCommand(viewModel.OpenLoginView, viewModel.CanOpenLoginView);
 
             DataContext = viewModel;
@@ -47,25 +47,30 @@ namespace TanzuForVS.WpfViews
 
         private void DeploymentStatus_TextChanged(object sender, TextChangedEventArgs e)
         {
-            deploymentStatusText.ScrollToEnd();
-        }
-
-        private void ShowOutputInOutputWindow(object sender, System.Windows.RoutedEventArgs e)
-        {
             var title = "My Cool Pane";
 
             OutputWindowPanes panes = _dte.ToolWindows.OutputWindow.OutputWindowPanes;
+            OutputWindowPane deploymentPane;
 
             try
             {
                 // If the pane exists already, write to it.
-                panes.Item(title);
+                deploymentPane = panes.Item(title);
             }
             catch (ArgumentException)
             {
                 // Create a new pane and write to it.
-                panes.Add(title);
+                deploymentPane = panes.Add(title);
             }
+
+            if (deploymentPane != null && sender is TextBox textBox)
+            {
+                deploymentPane.Clear();
+                deploymentPane.Activate();
+
+                deploymentPane.OutputString(textBox.Text);
+            }
+
         }
     }
 }
