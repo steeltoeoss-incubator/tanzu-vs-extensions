@@ -7,18 +7,20 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
     public class CmdProcessService : ICmdProcessService
     {
         StdOutDelegate StdOutHandler;
+        private string StdOutAggregator = "";
+        private string StdErrAggregator = "";
 
         public CmdProcessService()
         {
         }
 
         /// <summary>
-        /// Executes a new command with the given arguments. Returns true if the command process exits with a 0 exit code, otherwise returns false.
+        /// Begins a new command with the given arguments. Returns true if the command process exits with a 0 exit code, otherwise returns false.
         /// </summary>
         /// <param name="arguments"></param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<bool> ExecuteWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler)
+        public async Task<bool> InvokeWindowlessCommandAsync(string arguments, string workingDir, StdOutDelegate stdOutHandler)
         {
             //* Create your Process
             Process process = new Process();
@@ -47,7 +49,7 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             return false;
         }
 
-        public void InitiateWindowlessCommand(string arguments, string workingDir)
+        public Output ExecuteWindowlessCommand(string arguments, string workingDir)
         {
             //* Create your Process
             Process process = new Process();
@@ -60,6 +62,8 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             process.StartInfo.WorkingDirectory = workingDir;
 
             //* Set your output and error (asynchronous) handlers
+            StdOutAggregator = "";
+            StdErrAggregator = "";
             process.OutputDataReceived += new DataReceivedEventHandler(OutputHandler);
             process.ErrorDataReceived += new DataReceivedEventHandler(ErrorHandler);
 
@@ -67,22 +71,46 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CmdProcess
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
+
+            return new Output(StdOutAggregator, StdErrAggregator);
         }
 
         private void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
-            if (outLine.Data != null)
+            string outContent = outLine.Data;
+            if (outContent != null)
             {
-                StdOutHandler?.Invoke(outLine.Data);
+                StdOutHandler?.Invoke(outContent);
             }
         }
 
         private void ErrorHandler(object sendingProcess, DataReceivedEventArgs errLine)
         {
-            if (errLine.Data != null)
+            string errContent = errLine.Data;
+            if (errContent != null)
             {
-                StdOutHandler?.Invoke(errLine.Data);
+                StdOutHandler?.Invoke(errContent);
             }
         }
+
+        
+        private void StdOutRecorder(object sendingProcess, DataReceivedEventArgs outLine)
+        {
+            string outContent = outLine.Data;
+            if (outContent != null)
+            {
+                StdOutAggregator += $"{outContent}\n";
+            }
+        }
+
+        private void StdErrRecorder(object sendingProcess, DataReceivedEventArgs errLine)
+        {
+            string errContent = errLine.Data;
+            if (errContent != null)
+            {
+                StdErrAggregator += $"{errContent}\n";
+            }
+        }
+
     }
 }

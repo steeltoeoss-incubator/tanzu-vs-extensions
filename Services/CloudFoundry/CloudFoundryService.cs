@@ -9,6 +9,7 @@ using Tanzu.Toolkit.CloudFoundryApiClient.Models.OrgsResponse;
 using Tanzu.Toolkit.CloudFoundryApiClient.Models.SpacesResponse;
 using Tanzu.Toolkit.VisualStudio.Models;
 using Tanzu.Toolkit.VisualStudio.Services.CfCli;
+using Tanzu.Toolkit.VisualStudio.Services.CmdProcess;
 using Tanzu.Toolkit.VisualStudio.Services.FileLocator;
 using static Tanzu.Toolkit.VisualStudio.Services.OutputHandler.OutputHandler;
 
@@ -51,11 +52,12 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
             try
             {
                 string passwordStr = new System.Net.NetworkCredential(string.Empty, password).Password;
-                string accessToken = await _cfApiClient.LoginAsync(target, username, passwordStr);
 
                 //* Redundant call to `cf login` provisions the cli environment, enabling it to make 
                 //* requests like `cf push`, `cf orgs` (which require user to be logged in).
                 await LoginViaCfCli(target, username, skipSsl, passwordStr);
+
+                string accessToken = GetOAuthToken(); 
 
                 if (!string.IsNullOrEmpty(accessToken)) return new ConnectResult(true, null, accessToken);
                 throw new Exception(LoginFailureMessage);
@@ -212,10 +214,10 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         {
             if (!_fileLocatorService.DirContainsFiles(appProjPath)) return new DetailedResult(false, emptyOutputDirMessage);
 
-            DetailedResult cfTargetResult = await _cfCliService.ExecuteCfCliCommandAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutHandler: stdOutHandler);
+            DetailedResult cfTargetResult = await _cfCliService.InvokeCfCliAsync(arguments: $"target -o {targetOrg.OrgName} -s {targetSpace.SpaceName}", stdOutHandler: stdOutHandler);
             if (!cfTargetResult.Succeeded) return new DetailedResult(false, $"Unable to target org '{targetOrg.OrgName}' or space '{targetSpace.SpaceName}'.\n{cfTargetResult.Explanation}");
 
-            DetailedResult cfPushResult = await _cfCliService.ExecuteCfCliCommandAsync(arguments: "push " + appName, workingDir: appProjPath, stdOutHandler: stdOutHandler);
+            DetailedResult cfPushResult = await _cfCliService.InvokeCfCliAsync(arguments: "push " + appName, workingDir: appProjPath, stdOutHandler: stdOutHandler);
             if (!cfPushResult.Succeeded) return new DetailedResult(false, $"Successfully targeted org '{targetOrg.OrgName}' and space '{targetSpace.SpaceName}' but app deployment failed at the `cf push` stage.\n{cfPushResult.Explanation}");
 
             return new DetailedResult(true, $"App successfully deploying to org '{targetOrg.OrgName}', space '{targetSpace.SpaceName}'...");
@@ -232,10 +234,9 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CloudFoundry
         private static async Task LoginViaCfCli(string target, string username, bool skipSsl, string passwordStr)
         {
             string cfApiCmdArgs = $"api {target}{(skipSsl ? " --skip-ssl-validation" : string.Empty)}";
-            await _cfCliService.ExecuteCfCliCommandAsync(cfApiCmdArgs);
+            await _cfCliService.InvokeCfCliAsync(cfApiCmdArgs);
 
-            await _cfCliService.ExecuteCfCliCommandAsync($"auth {username} {passwordStr}");
+            await _cfCliService.InvokeCfCliAsync($"auth {username} {passwordStr}");
         }
-
     }
 }

@@ -20,6 +20,19 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         }
 
 
+        public string GetOAuthToken()
+        {
+            string args = $"oauth-token";
+            Output result = ExecuteCfCliCommand(args);
+
+            if (result.StdErr != null) return null;
+
+            var tokenStr = result.StdOut;
+            if (tokenStr.StartsWith("bearer ")) tokenStr.Remove(0, 7);
+
+            return tokenStr;
+        }
+
         /// <summary>
         /// Initiate a new Cloud Foundry CLI command with the given arguments.
         /// Invoke the command prompt and wait for the process to exit before returning.
@@ -28,13 +41,13 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
         /// <returns></returns>
-        public async Task<DetailedResult> ExecuteCfCliCommandAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
+        public async Task<DetailedResult> InvokeCfCliAsync(string arguments, StdOutDelegate stdOutHandler, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) return new DetailedResult(false, $"Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            bool commandSucceededWithoutError = await _cmdProcessService.ExecuteWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
+            bool commandSucceededWithoutError = await _cmdProcessService.InvokeWindowlessCommandAsync(commandStr, workingDir, stdOutHandler);
 
             if (commandSucceededWithoutError) return new DetailedResult(succeeded: true);
 
@@ -43,18 +56,17 @@ namespace Tanzu.Toolkit.VisualStudio.Services.CfCli
         }
 
         /// <summary>
-        /// Initiate a new CF CLI command with the given arguments. 
-        /// Invoke the command prompt process and return immediately; do not wait for process to exit.
+        /// Invoke the CF CLI command prompt process and return StdOut result string immediately; do not wait for process to exit.
         /// </summary>
         /// <param name="arguments">Parameters to include along with the `cf` command (e.g. "push", "apps")</param>
         /// <param name="workingDir"></param>
-        public void InitiateCfCliCommand(string arguments, string workingDir)
+        public Output ExecuteCfCliCommand(string arguments, string workingDir = null)
         {
             string pathToCfExe = _fileLocatorService.FullPathToCfExe;
             if (string.IsNullOrEmpty(pathToCfExe)) throw new FileNotFoundException("Unable to locate cf.exe.");
 
             string commandStr = '"' + pathToCfExe + '"' + ' ' + arguments;
-            _cmdProcessService.InitiateWindowlessCommand(commandStr, workingDir);
+            return _cmdProcessService.ExecuteWindowlessCommand(commandStr, workingDir);
         }
 
     }
