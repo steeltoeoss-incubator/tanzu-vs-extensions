@@ -1,3 +1,5 @@
+# tanzu-vs-extensions is no longer actively maintained by VMware, Inc.
+
 # tanzu-vs-extensions
 
 ## Introduction
